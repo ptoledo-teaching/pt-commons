@@ -1,0 +1,699 @@
+\ProvidesClass{pt-commons}[2025/04/21 v1.0 PT Commons Class]
+\NeedsTeXFormat{LaTeX2e}
+
+% Document metadata commands %%%%%%%%%%%%
+
+% Version control
+\newcommand{\version}[1]{\newcommand{\pt@version}{#1}}
+\newcommand{\build}[1]{\newcommand{\pt@build}{#1}}
+\renewcommand{\date}[1]{\newcommand{\pt@date}{#1}}
+% Document title
+\renewcommand{\title}[1]{\newcommand{\pt@title}{#1}}
+\newcommand{\titlesub}[1]{\newcommand{\pt@titlesub}{#1}}
+\newcommand{\titlesubsub}[1]{\newcommand{\pt@titlesubsub}{#1}}
+% Class information
+\newcommand{\classcode}[1]{\newcommand{\pt@classcode}{#1}}
+\newcommand{\classsemester}[1]{\newcommand{\pt@classsemester}{#1}}
+\newcommand{\classname}[1]{\newcommand{\pt@classname}{#1}}
+% Institution information
+\newcommand{\workgroup}[1]{\newcommand{\pt@workgroup}{#1}}
+\newcommand{\department}[1]{\newcommand{\pt@department}{#1}}
+\newcommand{\school}[1]{\newcommand{\pt@school}{#1}}
+\newcommand{\university}[1]{\newcommand{\pt@university}{#1}}
+
+% Authors handling %%%%%%%%%%%%%%%%%%%%%%
+
+% Common variables
+\newlength{\lengthname}
+\newlength{\lengthmail}
+\newlength{\minipagelength}
+\newcounter{authorindex}
+\setcounter{authorindex}{0}
+% Name formatting
+\newcommand\authornameentry[2]{#1, #2}
+% Email url formating
+\newcommand\authoremailentry[1]{\href{mailto:#1}{#1}}
+% Adding author
+\newcommand\addauthor[4]{%
+    \def\pt@authors{true}
+    \stepcounter{authorindex}%
+    \expandafter\def\csname authornamelast\theauthorindex\endcsname{#2}%
+    \expandafter\def\csname authornamefull\theauthorindex\endcsname{\authornameentry{#2}{#1}}
+    \expandafter\def\csname authoremailplain\theauthorindex\endcsname{#3}%
+    \expandafter\def\csname authoremailurl\theauthorindex\endcsname{\authoremailentry{#3}}
+    \expandafter\def\csname authordetails\theauthorindex\endcsname{#4}
+    \settowidth{\lengthname}{#1, #2\textsuperscript{\alph{authorindex}}}%
+    \settowidth{\lengthmail}{#3}%
+    \ifdim\lengthname>\minipagelength
+        \setlength{\minipagelength}{\lengthname}%
+    \fi
+    \ifdim\lengthmail>\minipagelength
+        \setlength{\minipagelength}{\lengthmail}%
+    \fi
+}
+\newcommand{\titleauthorsnames}[1]{%
+    \count1=1%
+    \loop%
+    \ifnum\count1<\numexpr\value{authorindex}+1\relax%
+        \ifnum\count1>1%
+            #1%
+        \fi%
+        \csname authornamefull\the\count1\endcsname
+    \advance\count1 by 1%
+    \repeat%
+}
+\newcommand{\titleauthorsboxes}{
+    \addtolength{\minipagelength}{3pt}
+    \count1=1
+    \loop
+    \ifnum\count1<\numexpr\value{authorindex}+1\relax
+    \begin{minipage}{\minipagelength}
+        \centering
+        \if\relax\csname authordetails\the\count1\endcsname\relax
+            \csname authornamefull\the\count1\endcsname\\
+        \else
+            \csname authornamefull\the\count1\endcsname\footnotemark[\the\count1]\\
+        \fi
+        \csname authoremailurl\the\count1\endcsname
+    \end{minipage}
+    \advance\count1 by 1
+    \repeat
+}
+\newcommand{\titleauthorsfootnotes}{
+    \count1=1
+    \loop
+    \ifnum\count1<\numexpr\value{authorindex}+1\relax
+    \if\relax\csname authordetails\the\count1\endcsname\relax
+    \else
+        \footnotetext[\the\count1]{\csname authordetails\the\count1\endcsname}
+    \fi
+    \advance\count1 by 1
+    \repeat
+}
+
+% Image commmands %%%%%%%%%%%%%%%%%%%%%%%
+\newcommand{\background}[1]{\newcommand{\pt@background}{#1}}
+\newcommand{\backgroundcredit}[1]{\newcommand{\pt@backgroundcredit}{#1}}
+\providecommand{\logo}[1]{\newcommand{\pt@logo}{#1}}
+
+% Fonts and encoding %%%%%%%%%%%%%%%%%%%%
+\RequirePackage[sfdefault, lining]{FiraSans}
+\RequirePackage[T1]{fontenc}
+\RequirePackage{fix-cm}
+
+% Processing language %%%%%%%%%%%%%%%%%%%
+\newcommand{\pt@language}{spanish}
+\DeclareOption{english}{\renewcommand\pt@language{english}}
+\DeclareOption{portuguese}{\renewcommand\pt@language{portuguese}}
+\ProcessOptions\relax
+\RequirePackage[\pt@language]{babel}
+
+% Colors %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\RequirePackage{xcolor}
+\definecolor{utfsmred}{HTML}{D60019}
+\definecolor{utfsmblue}{HTML}{004B85}
+\definecolor{utfsmgreen}{HTML}{008452}
+\definecolor{utfsmyellow}{HTML}{F7AE00}
+\definecolor{brunoblue}{HTML}{182936}
+\definecolor{brunomarroon}{HTML}{704730}
+\definecolor{brunolightgray}{HTML}{E6E6E6}
+% \definecolor{lightgray}{rgb}{.9,.9,.9}
+% \definecolor{darkgray}{rgb}{.4,.4,.4}
+% \definecolor{purple}{rgb}{0.65, 0.12, 0.82}
+
+% Fading %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\RequirePackage{tikz}
+\usetikzlibrary{fadings}
+\tikzfading[
+    name=title page picture fading,
+    left color=transparent!0,
+    right color=transparent!100,
+]
+
+% Watermark %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\RequirePackage[stamp=false]{draftwatermark}
+\newcommand{\setupwatermark}[1]{% 
+    \newlength{\@watermarkheight}
+    \newlength{\@watermarklen}
+    \newlength{\@watermarktargetlen}
+    \newlength{\@watermarkwidth}
+    \newlength{\@watermarkfinal}
+    \begingroup
+    % Calculate the watermark size
+    \fontsize{5cm}{6cm}\selectfont
+    \settowidth{\@watermarkwidth}{#1}%
+    \settoheight{\@watermarkheight}{#1}%
+    % Choose the smaller dimension between watermark width and height
+    \ifdim\@watermarkwidth>\@watermarkheight
+        \global\setlength{\@watermarklen}{\@watermarkwidth}%
+    \else
+        \global\setlength{\@watermarklen}{\@watermarkheight}%
+    \fi
+    \endgroup
+    % Calculate the watermark target size
+    \ifdim\paperwidth<\paperheight
+        \setlength{\@watermarktargetlen}{1.2\paperwidth}%
+    \else
+        \setlength{\@watermarktargetlen}{1.2\paperheight}%
+    \fi
+    \setlength{\@watermarkfinal}{\dimexpr 4cm * \@watermarktargetlen / \@watermarklen \relax}
+    % Set watermark properties
+    \SetWatermarkText{#1}%
+    \SetWatermarkFontSize{\@watermarkfinal}%
+    \SetWatermarkAngle{45}%
+    \SetWatermarkColor{utfsmred!21}
+}
+\newcommand{\watermark}[1]{\newcommand{\pt@watermark}{#1}}
+
+% Plots %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\RequirePackage{pgfplots}
+\usepgfplotslibrary{groupplots}
+\pgfplotsset{compat=1.18}
+
+% To reference labels %%%%%%%%%%%%%%%%%%%
+\RequirePackage{refcount}
+
+% Handy toolbox %%%%%%%%%%%%%%%%%%%%%%%%%
+\RequirePackage{etoolbox}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+% Packages
+% \RequirePackage[hyphens]{url}
+% \RequirePackage{bookmark}
+
+\RequirePackage{hyperref}
+\RequirePackage{listings}
+\RequirePackage{microtype}
+\RequirePackage{newtxsf} % Simbolos matemáticos en sand serif
+\RequirePackage{tabularray}
+\RequirePackage{tcolorbox}
+\RequirePackage{graphicx}
+% \RequirePackage{hyperref}
+% \RequirePackage{listings}
+\RequirePackage{colortbl}
+% \RequirePackage[most]{tcolorbox}
+% \RequirePackage{makecell}
+% \RequirePackage{accsupp}
+% \RequirePackage{enumitem}
+% \RequirePackage{array}
+% \RequirePackage{attachfile2}
+% \RequirePackage{tikz}
+% \RequirePackage{caption}
+% \RequirePackage[sfdefault,lf]{carlito}
+% \RequirePackage{datetime}
+% \RequirePackage{fancyhdr}
+% \RequirePackage{float}
+% \RequirePackage[T1]{fontenc}
+% \RequirePackage{geometry}
+% \RequirePackage{graphicx}
+% \RequirePackage[hidelinks]{hyperref}
+% \RequirePackage[utf8]{inputenc}
+% \RequirePackage{listings}
+% \RequirePackage{longtable}
+% \RequirePackage{multirow}
+% \RequirePackage{newfloat}
+% \RequirePackage{totcount}
+% \RequirePackage[table]{xcolor}
+% \RequirePackage{xurl}
+% \usepgfplotslibrary{groupplots}
+% \usetikzlibrary{positioning}
+
+
+% Page layout
+\RequirePackage{geometry}
+% Figures imports
+\RequirePackage{graphicx}
+
+\RequirePackage{etoolbox}
+\RequirePackage[absolute,overlay]{textpos}
+
+% Title page. If you want to add a background image on the title slide,
+% use the \background command to set the path to that image. Otherwise,
+% no image will be included
+
+
+% Class version
+\def\ptaversionmajor{1}
+\def\ptaversionminor{0}
+
+
+% Document versioning
+% Watermark
+
+% Date formating
+\newcommand{\todayymd}{\the\year/\twodigits\month/\twodigits\day}
+% Number to 2 digits number for dats
+\newcommand{\twodigits}[1]{%
+    \ifnum#1<10%
+        0%
+    \fi%
+    \the#1%
+}
+% Wrapper for conditional on variable existence
+\newcommand{\ifvardefined}[3]{%
+    \ifcsname#1\endcsname%
+        #2%
+    \else%
+        #3%
+    \fi
+}
+% Calculating the build count file name
+\newcommand{\buildcountfile}{
+    \ifvardefined{pt@version}{
+        \jobname\pt@version.buildcount
+    }{
+        \jobname.buildcount
+    }
+}
+
+\def\labelitemi{$\bullet$}
+\def\labelitemii{$\bullet$}
+\def\labelitemiii{$\bullet$}
+% \newcolumntype{L}[1]{>{\raggedright\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+% \newcolumntype{C}[1]{>{\centering\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+% \newcolumntype{R}[1]{>{\raggedleft\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+% \renewcommand\theadfont{\bfseries}
+
+% \setlist[itemize]{align=parleft,left=0.5em..1.5em}
+% \hypersetup{pdfencoding=auto}
+% \hypersetup{colorlinks}
+% \hypersetup{linkcolor=cyan}
+% \hypersetup{urlcolor=cyan}
+% \attachfilesetup{
+%     icon=Paperclip,
+%     mimetype=text/plain
+% }
+
+% Numbered list label styles
+\def\labelenumi{\theenumi.}
+\def\labelenumii{\theenumii.}
+\def\labelenumiii{\theenumiii.}
+\def\labelenumiv{\theenumiv.}
+
+\def\theenumi{\arabic{enumi}}
+\def\theenumii{\arabic{enumii}}
+\def\theenumiii{\arabic{enumiii}}
+\def\theenumiv{\arabic{enumiv}}
+
+% Bulleted list label styles
+\def\labelitemi{$\scriptstyle\bullet$}
+\def\labelitemii{$\scriptstyle\bullet$}
+\def\labelitemiii{$\scriptstyle\bullet$}
+\def\labelitemiv{$\scriptstyle\bullet$}
+
+
+% Tables styling
+% \renewcommand*\l@table{\@dottedtocline{1}{0pt}{21pt}}
+\BeforeBeginEnvironment{tblr}{\centering}
+\AtBeginEnvironment{tblr}{\footnotesize}
+\newcommand{\cellrotated}[1]{\rotatebox{90}{#1\hspace{4pt}}}
+\SetTblrInner{rowsep=0.6pt}
+\SetTblrInner{colsep=3pt}
+\SetTblrInner{width=\columnwidth}
+\NewColumnType{L}[1]{Q[l,t,wd=#1]}
+\NewColumnType{C}[1]{Q[c,t,wd=#1]}
+\NewColumnType{R}[1]{Q[r,t,wd=#1]}
+\NewTableCommand\tableheader{
+    \SetRow{
+        utfsmblue!42,
+        c,
+        font=\bfseries
+    }
+}
+\NewTableCommand\tablesubheader{
+    \SetRow{
+        utfsmblue!21
+    }
+}
+
+
+% % Tables configuration
+% \regtotcounter{table}
+
+% \captionsetup[table]{name=Tabla}
+% \captionsetup[table]{format=elements, singlelinecheck=false, margin=0pt, font={sf,footnotesize}}
+
+% % Figures configuration
+% \regtotcounter{figure}
+% \graphicspath{{figures/}}
+% \captionsetup[figure]{format=elements, singlelinecheck=false, margin=0pt, font={sf,footnotesize}}
+
+
+% \DeclareCaptionFormat{elements}{\captionsetup{justification=justified}\textbf{#1#2}#3\par}
+
+
+% Figures
+% \renewcommand*\l@figure{\@dottedtocline{1}{0pt}{21pt}}
+\newcommand{\ptfigure}[5]{
+    \begin{figure}[#1]
+        \centering
+        \includegraphics[#2]{#3}
+        \caption{#4}
+        \label{fig:#5}
+    \end{figure}
+}
+
+% Listings
+\lstset{
+    basicstyle=\small\ttfamily,
+    backgroundcolor=\color{gray!10},
+    keywordstyle=\color{blue},
+    commentstyle=\color{green!40!black},
+    stringstyle=\color{red},
+    rulecolor=\color{gray},
+    frame=single,
+    framerule=0pt,
+    framesep=2pt,
+    captionpos=b,
+    aboveskip=10pt,
+    belowskip=5pt,
+    columns=fullflexible,
+    keepspaces=true,
+    numberstyle=\color{black},
+    numbers=left,
+    stepnumber=1,
+    numbersep=5pt,
+    showstringspaces=false,
+}
+\lstdefinestyle{print}{
+    basicstyle=\color{black}\small\ttfamily,
+    keywordstyle=\color{black},
+    commentstyle=\color{black},
+    stringstyle=\color{black},
+    identifierstyle=\color{black}
+}
+
+\newcommand{\authoremail}[1]{\newcommand{\pt@authoremail}{#1}}
+
+
+
+
+
+% \renewcommand{\contentsname}{}
+% \renewcommand{\listfigurename}{}
+% \renewcommand{\figurename}{}
+% \renewcommand{\tablename}{}
+% \renewcommand{\partname}{}
+% \renewcommand{\chaptername}{}
+% \renewcommand{\appendixname}{}
+% \renewcommand{\bibname}{}
+% \renewcommand{\indexname}{}
+% \renewcommand{\refname}{}
+% \renewcommand{\abstractname}{}
+% \renewcommand{\proofname}{}
+\addto\captionsenglish{
+    \renewcommand{\tablename}{Table}
+    \renewcommand{\listtablename}{Tables}
+    \renewcommand{\lstlistingname}{Code}
+}
+\addto\captionsspanish{
+    \renewcommand{\tablename}{Tabla}
+    \renewcommand{\listtablename}{Lista de tablas}
+    \renewcommand{\lstlistingname}{Código}
+}
+% Caption formating
+\setlength{\abovecaptionskip}{5pt}
+\def\@makecaption#1#2{
+    \vskip\abovecaptionskip
+    \footnotesize
+    \textbf{#1:} #2
+    \vskip\belowcaptionskip
+}
+
+% Links format
+\hypersetup{
+    colorlinks,
+    linkcolor=utfsmblue,
+    urlcolor=utfsmblue
+}
+
+
+
+
+
+% \lstset{
+%     inputencoding=utf8,
+%     extendedchars=true,
+%     literate=%
+%     {á}{{\'a}}1
+%     {é}{{\'e}}1
+%     {í}{{\'i}}1
+%     {ó}{{\'o}}1
+%     {ú}{{\'u}}1
+%     {Á}{{\'A}}1
+%     {É}{{\'E}}1
+%     {Í}{{\'I}}1
+%     {Ó}{{\'O}}1
+%     {Ú}{{\'U}}1
+%     {ñ}{{\~n}}1
+%     {Ñ}{{\~N}}1
+% }
+% \lstset{
+%     basicstyle=\small\ttfamily,
+%     backgroundcolor=\color{gray!10},
+%     keywordstyle=\color{blue},
+%     commentstyle=\color{green!40!black},
+%     stringstyle=\color{red},
+%     rulecolor=\color{gray},
+%     frame=single,
+%     framerule=0pt,
+%     framesep=2pt,
+%     captionpos=b,
+%     aboveskip=10pt,
+%     belowskip=5pt,
+%     columns=fullflexible,
+%     keepspaces=true,
+%     numberstyle=\tiny\color{gray},
+%     numbers=left,
+%     stepnumber=1,
+%     numbersep=5pt,
+%     showstringspaces=false,
+% }
+% \lstdefinestyle{bashstyle}{
+%     language=bash
+% }
+% \lstnewenvironment{bashcode}{\lstset{style=bashstyle}}{}
+% \lstdefinestyle{pythonstyle}{
+%     language=python
+% }
+% \lstnewenvironment{pythoncode}{\lstset{style=pythonstyle}}{}
+% \lstdefinestyle{javastyle}{
+%     language=java
+% }
+% \lstnewenvironment{javacode}{\lstset{style=javastyle}}{}
+% \lstdefinestyle{xmlstyle}{
+%     language=xml
+% }
+% \lstnewenvironment{xmlcode}{\lstset{style=xmlstyle}}{}
+% \lstdefinestyle{plainstyle}{
+% }
+% \lstnewenvironment{plaincode}{\lstset{style=plainstyle}}{}
+
+
+% % Macros
+% \newcommand{\printif}[3]{\ifcsname @#1\endcsname#2\else#3\fi}
+
+% % Variables
+% \makeatletter
+%   \def\institution#1{\gdef\@institution{#1}}
+%   \def\classcode#1{\gdef\@classcode{#1}}
+%   \def\classname#1{\gdef\@classname{#1}}
+%   \def\classsemester#1{\gdef\@classsemester{#1}}
+%   \def\classparallel#1{\gdef\@classparallel{#1}}
+%   \def\doctitle#1{\gdef\@doctitle{#1}}
+%   \def\docsubtitle#1{\gdef\@docsubtitle{#1}}
+%   \def\version#1{\gdef\@version{#1}}
+%   \def\astudentname#1{\gdef\@astudentname{#1}}
+%   \def\astudentlastname#1{\gdef\@astudentlastname{#1}}
+%   \def\astudentrol#1{\gdef\@astudentrol{#1}}
+%   \def\astudentemail#1{\gdef\@astudentemail{#1}}
+%   \def\bstudentname#1{\gdef\@bstudentname{#1}}
+%   \def\bstudentlastname#1{\gdef\@bstudentlastname{#1}}
+%   \def\bstudentrol#1{\gdef\@bstudentrol{#1}}
+%   \def\bstudentemail#1{\gdef\@bstudentemail{#1}}
+%   \def\cstudentname#1{\gdef\@cstudentname{#1}}
+%   \def\cstudentlastname#1{\gdef\@cstudentlastname{#1}}
+%   \def\cstudentrol#1{\gdef\@cstudentrol{#1}}
+%   \def\cstudentemail#1{\gdef\@cstudentemail{#1}}
+% \makeatother
+
+% % Code configurations
+% \DeclareFloatingEnvironment[fileext=loc]{code}
+% \regtotcounter{lstlisting}
+% \renewcommand\lstlistingname{Código}
+% \captionsetup[lstlisting]{format=elements, singlelinecheck=false, margin=0pt, font={sf,footnotesize}}
+% \lstset{
+%     inputencoding=utf8,
+%     extendedchars=true,
+%     literate=%
+%     {á}{{\'a}}1
+%     {é}{{\'e}}1
+%     {í}{{\'i}}1
+%     {ó}{{\'o}}1
+%     {ú}{{\'u}}1
+%     {Á}{{\'A}}1
+%     {É}{{\'E}}1
+%     {Í}{{\'I}}1
+%     {Ó}{{\'O}}1
+%     {Ú}{{\'U}}1
+%     {ñ}{{\~n}}1
+%     {Ñ}{{\~N}}1
+% }
+% \lstset{
+%     basicstyle=\small\ttfamily,
+%     backgroundcolor=\color{gray!10},
+%     keywordstyle=\color{blue},
+%     commentstyle=\color{green!40!black},
+%     stringstyle=\color{red},
+%     rulecolor=\color{gray},
+%     frame=single,
+%     framerule=0pt,
+%     framesep=2pt,
+%     captionpos=b,
+%     aboveskip=10pt,
+%     belowskip=5pt,
+%     columns=fullflexible,
+%     keepspaces=true,
+%     numberstyle=\tiny\color{gray},
+%     numbers=left,
+%     stepnumber=1,
+%     numbersep=5pt,
+% }
+% \lstdefinestyle{pythonstyle}{
+%     language=python
+% }
+% \lstnewenvironment{pythoncode}{\lstset{style=pythonstyle}}{}
+% \lstdefinestyle{bashstyle}{
+%     language=bash
+% }
+% \lstnewenvironment{bashcode}{\lstset{style=bashstyle}}{}
+% \lstdefinestyle{xmlstyle}{
+%     language=xml
+% }
+% \lstnewenvironment{xmlcode}{\lstset{style=xmlstyle}}{}
+% \lstdefinestyle{javastyle}{
+%     language=java
+% }
+% \lstnewenvironment{javacode}{\lstset{style=javastyle}}{}
+% \lstdefinestyle{plainstyle}{
+% }
+% \lstnewenvironment{plaincode}{\lstset{style=plainstyle}}{}
+
+
+\newcommand{\ohref}[2]{%
+    \begingroup%
+    \hypersetup{urlcolor=.}%
+    \href{#1}{\color{.}#2}%
+    \endgroup%
+}
+% \makeatletter
+% \newcommand\appendtographicspath[1]{%
+%   \g@addto@macro\Ginput@path{#1}%
+% }
+% \makeatother
+% \newtcolorbox{blockquote}{colback=block-gray,grow to right by=-1mm,grow to left by=-1mm,boxrule=0pt,boxsep=0pt,breakable}
+
+
+
+\renewcommand*\oldstylenums[1]{{\firaoldstyle #1}}
+\renewcommand{\bfdefault}{sb}
+
+
+
+
+
+
+
+
+
+% Hooks
+% \AfterEndPreamble{
+%     \ifdefined\pt@watermark%
+%         \DraftwatermarkOptions{stamp=true}
+%         \SetWatermarkText{\pt@watermark\ifvardefined{pt@version}{\ - v\pt@version\ifvardefined{pt@build}{\ifdefstring{\pt@build}{auto}{.\buildcount}{.\pt@build}}{}}{\ifvardefined{pt@build}{\ifdefstring{\pt@build}{auto}{\ - B\buildcount}{\ - B\pt@build}}{}}}
+%     \fi
+%     % \maketitle
+%     % \sloppy
+% }
+\AtBeginDocument{
+    \ifdefined\pt@watermark%
+        \DraftwatermarkOptions{stamp=true}
+        \setupwatermark{\pt@watermark\ifvardefined{pt@version}{\ - v\pt@version\ifvardefined{pt@build}{\ifdefstring{\pt@build}{auto}{.\buildcount}{.\pt@build}}{}}{\ifvardefined{pt@build}{\ifdefstring{\pt@build}{auto}{\ - B\buildcount}{\ - B\pt@build}}{}}}
+    \fi
+    \IfFileExists{\buildcountfile}{%
+        \newread\file
+        \openin\file=\buildcountfile
+        \read\file to\buildcount
+        \closein\file
+        \ifx\buildcount\empty
+            \def\buildcount{0}
+        \fi
+    }{
+        \def\buildcount{0}
+    }
+}
+\AtEndDocument{
+    \newwrite\file
+    \immediate\openout\file=\buildcountfile
+    \edef\next{\number\numexpr\buildcount+1\relax}
+    \immediate\write\file{\next}
+    \immediate\closeout\file
+}
+
+% Legacy article
+
+% % Rule
+% \newcommand{\templaterule}{
+%     \vspace{6pt}
+%     \noindent\hfill\rule{0.42\columnwidth}{0.4pt}\hfill
+%     \vspace{2pt}
+% }
+
+% \newcommand{\ptgrid}[4]{
+%     \begin{center}
+%         \begin{tikzpicture}
+%             \def\nrows{#4}
+%             \def\ncols{#3}
+%             \foreach \x in {0,...,\numexpr\ncols-1\relax} {
+%                     \foreach \y in {0,...,\numexpr\nrows-1\relax} {
+%                             \draw[thick] (\x*#1, \y*#2) rectangle (\x*#1+#1, \y*#2+#2);
+%                         }
+%                 }
+%         \end{tikzpicture}
+%     \end{center}
+% }
+
+% \newcommand{\ptgridindent}[4]{
+%     \begin{center}
+%         \begin{tikzpicture}
+%             \def\nrows{#4}
+%             \def\ncols{#3}
+%             \foreach \x in {0,...,\numexpr\ncols-1\relax} {
+%                     \foreach \y in {0,...,\numexpr\nrows-1\relax} {
+%                             \draw[very thin, dashed] (\x*#1, \y*#2) -- (\x*#1, \y*#2+#2); % Vertical dashed lines (even slimmer)
+%                             \draw[thick] (\x*#1, \y*#2) -- (\x*#1+#1, \y*#2); % Horizontal solid lines
+%                         }
+%                 }
+%             % Add the right border
+%             \foreach \y in {0,...,\numexpr\nrows-1\relax} {
+%                     \draw[very thin, dashed] (\ncols*#1, \y*#2) -- (\ncols*#1, \y*#2+#2); % Right vertical dashed line (even slimmer)
+%                 }
+%             % Add the top border
+%             \foreach \x in {0,...,\numexpr\ncols-1\relax} {
+%                     \draw[thick] (\x*#1, \nrows*#2) -- (\x*#1+#1, \nrows*#2); % Top horizontal solid line
+%                 }
+%         \end{tikzpicture}
+%     \end{center}
+% }
