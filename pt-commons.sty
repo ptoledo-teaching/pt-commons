@@ -1,12 +1,56 @@
 \ProvidesClass{pt-commons}[2025/04/21 v1.0 PT Commons Class]
 \NeedsTeXFormat{LaTeX2e}
 
-% Document metadata commands %%%%%%%%%%%%
+% Commons %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Packages
+\RequirePackage{colortbl}
+\RequirePackage{etoolbox}
+\RequirePackage{geometry}
+\RequirePackage{graphicx}
+\RequirePackage{microtype}
+\RequirePackage{newtxsf}
+\RequirePackage{tabularray}
+\RequirePackage{tcolorbox}
+\RequirePackage[absolute,overlay]{textpos}
+% Hyperlinks
+\RequirePackage{hyperref}
+\hypersetup{
+    colorlinks,
+    linkcolor=ptlightblue,
+    urlcolor=ptlightblue
+}
+% Commands
+\newcommand{\inlinecode}[1]{{\ttfamily\bfseries\detokenize{#1}}}
+\newcommand{\todayymd}{\the\year/\twodigits\month/\twodigits\day}
+% Number to 2 digits number for dats
+\newcommand{\twodigits}[1]{%
+    \ifnum#1<10%
+        0%
+    \fi%
+    \the#1%
+}
+
+% Document metadata commands %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Version control
 \newcommand{\version}[1]{\newcommand{\pt@version}{#1}}
 \newcommand{\build}[1]{\newcommand{\pt@build}{#1}}
 \renewcommand{\date}[1]{\newcommand{\pt@date}{#1}}
+\newcommand{\docversion}{
+    \ifdefined\pt@version%
+        v\pt@version
+    \else%
+        NA
+    \fi%
+}
+\newcommand{\buildcountfile}{
+    \ifdefined\pt@version
+        \jobname\pt@version.buildcount
+    \else
+        \jobname.buildcount
+    \fi
+}
 % Document title
 \renewcommand{\title}[1]{\newcommand{\pt@title}{#1}}
 \newcommand{\titlesub}[1]{\newcommand{\pt@titlesub}{#1}}
@@ -21,7 +65,48 @@
 \newcommand{\school}[1]{\newcommand{\pt@school}{#1}}
 \newcommand{\university}[1]{\newcommand{\pt@university}{#1}}
 
-% Authors handling %%%%%%%%%%%%%%%%%%%%%%
+% Fonts, encoding and language %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Encoding
+\RequirePackage[utf8]{inputenc}
+\RequirePackage[T1]{fontenc}
+% Fonts
+\RequirePackage[sfdefault,scaled=.85]{FiraSans}
+\RequirePackage{fix-cm}
+\RequirePackage[scaled=0.9]{inconsolata} 
+% Language
+\newcommand{\pt@language}{spanish}
+\DeclareOption{english}{\renewcommand\pt@language{english}}
+\DeclareOption{portuguese}{\renewcommand\pt@language{portuguese}}
+\ProcessOptions\relax
+\RequirePackage[\pt@language]{babel}
+% Language specific commands
+\addto\captionsenglish{
+    \renewcommand{\tablename}{Table}
+    \renewcommand{\listtablename}{Tables}
+    \renewcommand{\lstlistingname}{Code}
+    \providecommand{\pt@labelquestions}{Questions?}
+    \providecommand{\pt@labelbackgroundsource}{Background source}
+    \providecommand{\pt@labeltemplatecredit}{Theme template}
+}
+\addto\captionsspanish{
+    \renewcommand{\tablename}{Tabla}
+    \renewcommand{\listtablename}{Lista de tablas}
+    \renewcommand{\lstlistingname}{Código}
+    \providecommand{\pt@labelquestions}{¿Preguntas?}
+    \providecommand{\pt@labelbackgroundsource}{Fotografía de fondo}
+    \providecommand{\pt@labeltemplatecredit}{Plantilla del tema}
+}
+\addto\captionsportuguese{
+    \renewcommand{\tablename}{Tabela}
+    \renewcommand{\listtablename}{Listas de tabelas}
+    \renewcommand{\lstlistingname}{Código}
+    \providecommand{\pt@labelquestions}{Perguntas?}
+    \providecommand{\pt@labelbackgroundsource}{Fonte da imagem de fundo}
+    \providecommand{\pt@labeltemplatecredit}{Modelo do tema}
+}
+
+% Authors handling %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Common variables
 \newlength{\lengthname}
@@ -55,10 +140,24 @@
     \count1=1%
     \loop%
     \ifnum\count1<\numexpr\value{authorindex}+1\relax%
-        \ifnum\count1>1%
-            #1%
-        \fi%
-        \csname authornamefull\the\count1\endcsname
+    \ifnum\count1>1%
+        #1%
+    \fi%
+    \csname authornamefull\the\count1\endcsname
+    \advance\count1 by 1%
+    \repeat%
+}
+\newcommand{\titleauthorsfooter}[1]{%
+    \count1=1%
+    \loop%
+    \ifnum\count1<\numexpr\value{authorindex}+1\relax%
+    \ifnum\count1>1%
+        #1%
+    \fi%
+    \csname authornamefull\the\count1\endcsname%
+    \ifcsname authoremailurl\the\count1\endcsname%
+        \ (\csname authoremailurl\the\count1\endcsname)%
+    \fi%
     \advance\count1 by 1%
     \repeat%
 }
@@ -91,37 +190,30 @@
     \repeat
 }
 
-% Image commmands %%%%%%%%%%%%%%%%%%%%%%%
+% Graphics %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Colors
+\RequirePackage{xcolor}
+\definecolor{ptred}{HTML}{D60019}
+\definecolor{ptdarkred}{HTML}{68000C}
+\definecolor{ptlightblue}{HTML}{499BDA}
+\definecolor{ptblue}{HTML}{004B85}
+\definecolor{ptdarkblue}{HTML}{002038}
+\definecolor{ptgreen}{HTML}{008452}
+\definecolor{ptdarkgreen}{HTML}{003823}
+\definecolor{ptyellow}{HTML}{F7AE00}
+\definecolor{ptdarkyellow}{HTML}{896000}
+\definecolor{ptgray}{HTML}{E0E0E0}
+\definecolor{ptdarkgray}{HTML}{949494}
+% Images
 \newcommand{\background}[1]{\newcommand{\pt@background}{#1}}
 \newcommand{\backgroundcredit}[1]{\newcommand{\pt@backgroundcredit}{#1}}
-\providecommand{\logo}[1]{\newcommand{\pt@logo}{#1}}
-
-% Fonts and encoding %%%%%%%%%%%%%%%%%%%%
-\RequirePackage[sfdefault, lining]{FiraSans}
-\RequirePackage[T1]{fontenc}
-\RequirePackage{fix-cm}
-
-% Processing language %%%%%%%%%%%%%%%%%%%
-\newcommand{\pt@language}{spanish}
-\DeclareOption{english}{\renewcommand\pt@language{english}}
-\DeclareOption{portuguese}{\renewcommand\pt@language{portuguese}}
-\ProcessOptions\relax
-\RequirePackage[\pt@language]{babel}
-
-% Colors %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\RequirePackage{xcolor}
-\definecolor{utfsmred}{HTML}{D60019}
-\definecolor{utfsmblue}{HTML}{004B85}
-\definecolor{utfsmgreen}{HTML}{008452}
-\definecolor{utfsmyellow}{HTML}{F7AE00}
-\definecolor{brunoblue}{HTML}{182936}
-\definecolor{brunomarroon}{HTML}{704730}
-\definecolor{brunolightgray}{HTML}{E6E6E6}
-% \definecolor{lightgray}{rgb}{.9,.9,.9}
-% \definecolor{darkgray}{rgb}{.4,.4,.4}
-% \definecolor{purple}{rgb}{0.65, 0.12, 0.82}
-
-% Fading %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\ifdefined\logo
+    \renewcommand{\logo}[1]{\newcommand{\pt@logo}{#1}}
+\else
+    \newcommand{\logo}[1]{\newcommand{\pt@logo}{#1}}
+\fi
+% Fading
 \RequirePackage{tikz}
 \usetikzlibrary{fadings}
 \tikzfading[
@@ -129,8 +221,105 @@
     left color=transparent!0,
     right color=transparent!100,
 ]
+% Plots
+\RequirePackage{pgfplots}
+\usepgfplotslibrary{groupplots}
+\pgfplotsset{compat=1.18}
+% Macros
+\newcommand{\ptfigure}[5]{
+    % 1: Position (h, t, b, p)
+    % 2: Options (width, height, scale, etc.)
+    % 3: Image path
+    % 4: Caption
+    \begin{figure}[#1]
+        \centering
+        \includegraphics[#2]{#3}
+        \caption{#4}
+        \label{fig:#5}
+    \end{figure}
+}
 
-% Watermark %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Text styling %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Itemize bullets
+\def\labelitemi{$\bullet$}
+\def\labelitemii{$\bullet$}
+\def\labelitemiii{$\bullet$}
+\def\labelitemiv{$\bullet$}
+% Bulleted list label styles
+\def\labelitemi{$\scriptstyle\bullet$}
+\def\labelitemii{$\scriptstyle\bullet$}
+\def\labelitemiii{$\scriptstyle\bullet$}
+\def\labelitemiv{$\scriptstyle\bullet$}
+% Numbered list label styles
+\def\labelenumi{\theenumi.}
+\def\labelenumii{\theenumii.}
+\def\labelenumiii{\theenumiii.}
+\def\labelenumiv{\theenumiv.}
+% Numbered list counter styles
+\def\theenumi{\arabic{enumi}}
+\def\theenumii{\arabic{enumii}}
+\def\theenumiii{\arabic{enumiii}}
+\def\theenumiv{\arabic{enumiv}}
+
+% Tables styling %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\BeforeBeginEnvironment{tblr}{\centering}
+\AtBeginEnvironment{tblr}{\footnotesize}
+\newcommand{\cellrotated}[1]{\rotatebox{90}{#1\hspace{4pt}}}
+\SetTblrInner{rowsep=0.6pt}
+\SetTblrInner{colsep=3pt}
+\SetTblrInner{width=\columnwidth}
+\NewColumnType{L}[1]{Q[l,t,wd=#1]}
+\NewColumnType{C}[1]{Q[c,t,wd=#1]}
+\NewColumnType{R}[1]{Q[r,t,wd=#1]}
+\NewTableCommand\tableheader{
+    \SetRow{
+        ptblue!42,
+        c,
+        font=\bfseries
+    }
+}
+\NewTableCommand\tablesubheader{
+    \SetRow{
+        ptblue!21
+    }
+}
+
+% Code styling %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\RequirePackage{listings}
+\lstset{
+    basicstyle=\small\ttfamily,
+    backgroundcolor=\color{gray!10},
+    keywordstyle=\color{blue},
+    commentstyle=\color{green!40!black},
+    stringstyle=\color{red},
+    rulecolor=\color{gray},
+    frame=single,
+    framerule=0pt,
+    framesep=2pt,
+    captionpos=b,
+    aboveskip=10pt,
+    belowskip=5pt,
+    columns=fullflexible,
+    keepspaces=true,
+    numberstyle=\color{black},
+    numbers=left,
+    stepnumber=1,
+    numbersep=5pt,
+    showstringspaces=false,
+}
+\lstdefinestyle{print}{
+    basicstyle=\color{black}\small\ttfamily,
+    keywordstyle=\color{black},
+    commentstyle=\color{black},
+    stringstyle=\color{black},
+    identifierstyle=\color{black}
+}
+
+% Watermark %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 \RequirePackage[stamp=false]{draftwatermark}
 \newcommand{\setupwatermark}[1]{% 
     \newlength{\@watermarkheight}
@@ -161,52 +350,79 @@
     \SetWatermarkText{#1}%
     \SetWatermarkFontSize{\@watermarkfinal}%
     \SetWatermarkAngle{45}%
-    \SetWatermarkColor{utfsmred!21}
+    \SetWatermarkColor{ptred!21}
+    \SetWatermarkHorCenter{0.4\paperwidth}
 }
 \newcommand{\watermark}[1]{\newcommand{\pt@watermark}{#1}}
 
-% Plots %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\RequirePackage{pgfplots}
-\usepgfplotslibrary{groupplots}
-\pgfplotsset{compat=1.18}
+% Hooks %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% To reference labels %%%%%%%%%%%%%%%%%%%
-\RequirePackage{refcount}
+\AtBeginDocument{
+    \ifdefined\pt@watermark%
+        \DraftwatermarkOptions{stamp=true}
+        \setupwatermark{
+            \pt@watermark
+            \ifdefined\pt@version%
+                \ - v\pt@version
+                \ifdefined\pt@build
+                    \ifdefstring{\pt@build}{auto}{.\buildcount}{.\pt@build}
+                \fi
+            \else
+                \ifdefined\pt@build%
+                    \ifdefstring{\pt@build}{auto}{\ - B\buildcount}{\ - B\pt@build}
+                \fi
+            \fi
+        }
+    \fi
+    \IfFileExists{\buildcountfile}{%
+        \newread\file
+        \openin\file=\buildcountfile
+        \read\file to\buildcount
+        \closein\file
+        \ifx\buildcount\empty
+            \def\buildcount{0}
+        \fi
+    }{
+        \def\buildcount{0}
+    }
+    \sloppy
+}
+\AtEndDocument{
+    \newwrite\file
+    \immediate\openout\file=\buildcountfile
+    \edef\next{\number\numexpr\buildcount+1\relax}
+    \immediate\write\file{\next}
+    \immediate\closeout\file
+}
 
-% Handy toolbox %%%%%%%%%%%%%%%%%%%%%%%%%
-\RequirePackage{etoolbox}
+% Legacy %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-% Packages
+% \definecolor{lightgray}{rgb}{.9,.9,.9}
+% \definecolor{darkgray}{rgb}{.4,.4,.4}
+% \definecolor{purple}{rgb}{0.65, 0.12, 0.82}
+% % Caption formating
+% \setlength{\abovecaptionskip}{5pt}
+% \def\@makecaption#1#2{
+%     \vskip\abovecaptionskip
+%     \footnotesize
+%     \textbf{#1:} #2
+%     \vskip\belowcaptionskip
+% }
+% \renewcommand*\oldstylenums[1]{{\firaoldstyle #1}}
+% \renewcommand{\bfdefault}{sb}
+% \newcommand{\ohref}[2]{%
+%     \begingroup%
+%     \hypersetup{urlcolor=.}%
+%     \href{#1}{\color{.}#2}%
+%     \endgroup%
+% }
 % \RequirePackage[hyphens]{url}
 % \RequirePackage{bookmark}
-
-\RequirePackage{hyperref}
-\RequirePackage{listings}
-\RequirePackage{microtype}
-\RequirePackage{newtxsf} % Simbolos matemáticos en sand serif
-\RequirePackage{tabularray}
-\RequirePackage{tcolorbox}
-\RequirePackage{graphicx}
 % \RequirePackage{hyperref}
 % \RequirePackage{listings}
-\RequirePackage{colortbl}
 % \RequirePackage[most]{tcolorbox}
 % \RequirePackage{makecell}
 % \RequirePackage{accsupp}
-% \RequirePackage{enumitem}
 % \RequirePackage{array}
 % \RequirePackage{attachfile2}
 % \RequirePackage{tikz}
@@ -229,63 +445,11 @@
 % \RequirePackage{xurl}
 % \usepgfplotslibrary{groupplots}
 % \usetikzlibrary{positioning}
-
-
-% Page layout
-\RequirePackage{geometry}
-% Figures imports
-\RequirePackage{graphicx}
-
-\RequirePackage{etoolbox}
-\RequirePackage[absolute,overlay]{textpos}
-
-% Title page. If you want to add a background image on the title slide,
-% use the \background command to set the path to that image. Otherwise,
-% no image will be included
-
-
-% Class version
-\def\ptaversionmajor{1}
-\def\ptaversionminor{0}
-
-
-% Document versioning
-% Watermark
-
-% Date formating
-\newcommand{\todayymd}{\the\year/\twodigits\month/\twodigits\day}
-% Number to 2 digits number for dats
-\newcommand{\twodigits}[1]{%
-    \ifnum#1<10%
-        0%
-    \fi%
-    \the#1%
-}
-% Wrapper for conditional on variable existence
-\newcommand{\ifvardefined}[3]{%
-    \ifcsname#1\endcsname%
-        #2%
-    \else%
-        #3%
-    \fi
-}
-% Calculating the build count file name
-\newcommand{\buildcountfile}{
-    \ifvardefined{pt@version}{
-        \jobname\pt@version.buildcount
-    }{
-        \jobname.buildcount
-    }
-}
-
-\def\labelitemi{$\bullet$}
-\def\labelitemii{$\bullet$}
-\def\labelitemiii{$\bullet$}
+% \renewcommand*\l@table{\@dottedtocline{1}{0pt}{21pt}}
 % \newcolumntype{L}[1]{>{\raggedright\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
 % \newcolumntype{C}[1]{>{\centering\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
 % \newcolumntype{R}[1]{>{\raggedleft\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
 % \renewcommand\theadfont{\bfseries}
-
 % \setlist[itemize]{align=parleft,left=0.5em..1.5em}
 % \hypersetup{pdfencoding=auto}
 % \hypersetup{colorlinks}
@@ -295,112 +459,17 @@
 %     icon=Paperclip,
 %     mimetype=text/plain
 % }
-
-% Numbered list label styles
-\def\labelenumi{\theenumi.}
-\def\labelenumii{\theenumii.}
-\def\labelenumiii{\theenumiii.}
-\def\labelenumiv{\theenumiv.}
-
-\def\theenumi{\arabic{enumi}}
-\def\theenumii{\arabic{enumii}}
-\def\theenumiii{\arabic{enumiii}}
-\def\theenumiv{\arabic{enumiv}}
-
-% Bulleted list label styles
-\def\labelitemi{$\scriptstyle\bullet$}
-\def\labelitemii{$\scriptstyle\bullet$}
-\def\labelitemiii{$\scriptstyle\bullet$}
-\def\labelitemiv{$\scriptstyle\bullet$}
-
-
-% Tables styling
-% \renewcommand*\l@table{\@dottedtocline{1}{0pt}{21pt}}
-\BeforeBeginEnvironment{tblr}{\centering}
-\AtBeginEnvironment{tblr}{\footnotesize}
-\newcommand{\cellrotated}[1]{\rotatebox{90}{#1\hspace{4pt}}}
-\SetTblrInner{rowsep=0.6pt}
-\SetTblrInner{colsep=3pt}
-\SetTblrInner{width=\columnwidth}
-\NewColumnType{L}[1]{Q[l,t,wd=#1]}
-\NewColumnType{C}[1]{Q[c,t,wd=#1]}
-\NewColumnType{R}[1]{Q[r,t,wd=#1]}
-\NewTableCommand\tableheader{
-    \SetRow{
-        utfsmblue!42,
-        c,
-        font=\bfseries
-    }
-}
-\NewTableCommand\tablesubheader{
-    \SetRow{
-        utfsmblue!21
-    }
-}
-
-
-% % Tables configuration
+% \newcommand{\authoremail}[1]{\newcommand{\pt@authoremail}{#1}}
 % \regtotcounter{table}
-
 % \captionsetup[table]{name=Tabla}
 % \captionsetup[table]{format=elements, singlelinecheck=false, margin=0pt, font={sf,footnotesize}}
-
 % % Figures configuration
 % \regtotcounter{figure}
 % \graphicspath{{figures/}}
 % \captionsetup[figure]{format=elements, singlelinecheck=false, margin=0pt, font={sf,footnotesize}}
-
-
 % \DeclareCaptionFormat{elements}{\captionsetup{justification=justified}\textbf{#1#2}#3\par}
-
-
 % Figures
 % \renewcommand*\l@figure{\@dottedtocline{1}{0pt}{21pt}}
-\newcommand{\ptfigure}[5]{
-    \begin{figure}[#1]
-        \centering
-        \includegraphics[#2]{#3}
-        \caption{#4}
-        \label{fig:#5}
-    \end{figure}
-}
-
-% Listings
-\lstset{
-    basicstyle=\small\ttfamily,
-    backgroundcolor=\color{gray!10},
-    keywordstyle=\color{blue},
-    commentstyle=\color{green!40!black},
-    stringstyle=\color{red},
-    rulecolor=\color{gray},
-    frame=single,
-    framerule=0pt,
-    framesep=2pt,
-    captionpos=b,
-    aboveskip=10pt,
-    belowskip=5pt,
-    columns=fullflexible,
-    keepspaces=true,
-    numberstyle=\color{black},
-    numbers=left,
-    stepnumber=1,
-    numbersep=5pt,
-    showstringspaces=false,
-}
-\lstdefinestyle{print}{
-    basicstyle=\color{black}\small\ttfamily,
-    keywordstyle=\color{black},
-    commentstyle=\color{black},
-    stringstyle=\color{black},
-    identifierstyle=\color{black}
-}
-
-\newcommand{\authoremail}[1]{\newcommand{\pt@authoremail}{#1}}
-
-
-
-
-
 % \renewcommand{\contentsname}{}
 % \renewcommand{\listfigurename}{}
 % \renewcommand{\figurename}{}
@@ -413,36 +482,6 @@
 % \renewcommand{\refname}{}
 % \renewcommand{\abstractname}{}
 % \renewcommand{\proofname}{}
-\addto\captionsenglish{
-    \renewcommand{\tablename}{Table}
-    \renewcommand{\listtablename}{Tables}
-    \renewcommand{\lstlistingname}{Code}
-}
-\addto\captionsspanish{
-    \renewcommand{\tablename}{Tabla}
-    \renewcommand{\listtablename}{Lista de tablas}
-    \renewcommand{\lstlistingname}{Código}
-}
-% Caption formating
-\setlength{\abovecaptionskip}{5pt}
-\def\@makecaption#1#2{
-    \vskip\abovecaptionskip
-    \footnotesize
-    \textbf{#1:} #2
-    \vskip\belowcaptionskip
-}
-
-% Links format
-\hypersetup{
-    colorlinks,
-    linkcolor=utfsmblue,
-    urlcolor=utfsmblue
-}
-
-
-
-
-
 % \lstset{
 %     inputencoding=utf8,
 %     extendedchars=true,
@@ -500,35 +539,8 @@
 % \lstdefinestyle{plainstyle}{
 % }
 % \lstnewenvironment{plaincode}{\lstset{style=plainstyle}}{}
-
-
 % % Macros
 % \newcommand{\printif}[3]{\ifcsname @#1\endcsname#2\else#3\fi}
-
-% % Variables
-% \makeatletter
-%   \def\institution#1{\gdef\@institution{#1}}
-%   \def\classcode#1{\gdef\@classcode{#1}}
-%   \def\classname#1{\gdef\@classname{#1}}
-%   \def\classsemester#1{\gdef\@classsemester{#1}}
-%   \def\classparallel#1{\gdef\@classparallel{#1}}
-%   \def\doctitle#1{\gdef\@doctitle{#1}}
-%   \def\docsubtitle#1{\gdef\@docsubtitle{#1}}
-%   \def\version#1{\gdef\@version{#1}}
-%   \def\astudentname#1{\gdef\@astudentname{#1}}
-%   \def\astudentlastname#1{\gdef\@astudentlastname{#1}}
-%   \def\astudentrol#1{\gdef\@astudentrol{#1}}
-%   \def\astudentemail#1{\gdef\@astudentemail{#1}}
-%   \def\bstudentname#1{\gdef\@bstudentname{#1}}
-%   \def\bstudentlastname#1{\gdef\@bstudentlastname{#1}}
-%   \def\bstudentrol#1{\gdef\@bstudentrol{#1}}
-%   \def\bstudentemail#1{\gdef\@bstudentemail{#1}}
-%   \def\cstudentname#1{\gdef\@cstudentname{#1}}
-%   \def\cstudentlastname#1{\gdef\@cstudentlastname{#1}}
-%   \def\cstudentrol#1{\gdef\@cstudentrol{#1}}
-%   \def\cstudentemail#1{\gdef\@cstudentemail{#1}}
-% \makeatother
-
 % % Code configurations
 % \DeclareFloatingEnvironment[fileext=loc]{code}
 % \regtotcounter{lstlisting}
@@ -590,77 +602,13 @@
 % \lstdefinestyle{plainstyle}{
 % }
 % \lstnewenvironment{plaincode}{\lstset{style=plainstyle}}{}
-
-
-\newcommand{\ohref}[2]{%
-    \begingroup%
-    \hypersetup{urlcolor=.}%
-    \href{#1}{\color{.}#2}%
-    \endgroup%
-}
-% \makeatletter
-% \newcommand\appendtographicspath[1]{%
-%   \g@addto@macro\Ginput@path{#1}%
-% }
-% \makeatother
-% \newtcolorbox{blockquote}{colback=block-gray,grow to right by=-1mm,grow to left by=-1mm,boxrule=0pt,boxsep=0pt,breakable}
-
-
-
-\renewcommand*\oldstylenums[1]{{\firaoldstyle #1}}
-\renewcommand{\bfdefault}{sb}
-
-
-
-
-
-
-
-
-
-% Hooks
-% \AfterEndPreamble{
-%     \ifdefined\pt@watermark%
-%         \DraftwatermarkOptions{stamp=true}
-%         \SetWatermarkText{\pt@watermark\ifvardefined{pt@version}{\ - v\pt@version\ifvardefined{pt@build}{\ifdefstring{\pt@build}{auto}{.\buildcount}{.\pt@build}}{}}{\ifvardefined{pt@build}{\ifdefstring{\pt@build}{auto}{\ - B\buildcount}{\ - B\pt@build}}{}}}
-%     \fi
-%     % \maketitle
-%     % \sloppy
-% }
-\AtBeginDocument{
-    \ifdefined\pt@watermark%
-        \DraftwatermarkOptions{stamp=true}
-        \setupwatermark{\pt@watermark\ifvardefined{pt@version}{\ - v\pt@version\ifvardefined{pt@build}{\ifdefstring{\pt@build}{auto}{.\buildcount}{.\pt@build}}{}}{\ifvardefined{pt@build}{\ifdefstring{\pt@build}{auto}{\ - B\buildcount}{\ - B\pt@build}}{}}}
-    \fi
-    \IfFileExists{\buildcountfile}{%
-        \newread\file
-        \openin\file=\buildcountfile
-        \read\file to\buildcount
-        \closein\file
-        \ifx\buildcount\empty
-            \def\buildcount{0}
-        \fi
-    }{
-        \def\buildcount{0}
-    }
-}
-\AtEndDocument{
-    \newwrite\file
-    \immediate\openout\file=\buildcountfile
-    \edef\next{\number\numexpr\buildcount+1\relax}
-    \immediate\write\file{\next}
-    \immediate\closeout\file
-}
-
 % Legacy article
-
 % % Rule
 % \newcommand{\templaterule}{
 %     \vspace{6pt}
 %     \noindent\hfill\rule{0.42\columnwidth}{0.4pt}\hfill
 %     \vspace{2pt}
 % }
-
 % \newcommand{\ptgrid}[4]{
 %     \begin{center}
 %         \begin{tikzpicture}
@@ -674,7 +622,6 @@
 %         \end{tikzpicture}
 %     \end{center}
 % }
-
 % \newcommand{\ptgridindent}[4]{
 %     \begin{center}
 %         \begin{tikzpicture}
@@ -697,3 +644,6 @@
 %         \end{tikzpicture}
 %     \end{center}
 % }
+% \setbeamercolor{block body}{bg=ptgray}
+% \setbeamercolor{block title}{bg=ptdarkblue, fg=white}
+% \setbeamercolor{separator}{fg=ptred, bg=ptred}
