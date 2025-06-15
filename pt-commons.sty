@@ -78,29 +78,42 @@
 \newcommand{\pt@language}{spanish}
 \DeclareOption{english}{\renewcommand\pt@language{english}}
 \DeclareOption{portuguese}{\renewcommand\pt@language{portuguese}}
+\DeclareOption{french}{\renewcommand\pt@language{french}}
 \ProcessOptions\relax
 \RequirePackage[\pt@language]{babel}
 % Language specific commands
-\addto\captionsenglish{
-    \renewcommand{\tablename}{Table}
-    \renewcommand{\listtablename}{Tables}
-    \renewcommand{\lstlistingname}{Code}
-    \providecommand{\pt@labelquestions}{Questions?}
-    \providecommand{\pt@labelbackgroundsource}{Background source}
-    \providecommand{\pt@labeltemplatecredit}{Theme template}
-}
 \addto\captionsspanish{
     \renewcommand{\tablename}{Tabla}
     \renewcommand{\listtablename}{Lista de tablas}
     \renewcommand{\lstlistingname}{Código}
+    \providecommand{\pt@labeltoc}{Tabla de contenidos}
     \providecommand{\pt@labelquestions}{¿Preguntas?}
     \providecommand{\pt@labelbackgroundsource}{Fotografía de fondo}
     \providecommand{\pt@labeltemplatecredit}{Plantilla del tema}
+}
+\addto\captionsenglish{
+    \renewcommand{\tablename}{Table}
+    \renewcommand{\listtablename}{Tables}
+    \renewcommand{\lstlistingname}{Code}
+    \providecommand{\pt@labeltoc}{Table of Contents}
+    \providecommand{\pt@labelquestions}{Questions?}
+    \providecommand{\pt@labelbackgroundsource}{Background source}
+    \providecommand{\pt@labeltemplatecredit}{Theme template}
+}
+\addto\captionsfrench{
+    \renewcommand{\tablename}{Tableau}
+    \renewcommand{\listtablename}{Liste des tableaux}
+    \renewcommand{\lstlistingname}{Code}
+    \providecommand{\pt@labeltoc}{Table des matières}
+    \providecommand{\pt@labelquestions}{Questions ?}
+    \providecommand{\pt@labelbackgroundsource}{Source de l'image de fond}
+    \providecommand{\pt@labeltemplatecredit}{Modèle du thème}
 }
 \addto\captionsportuguese{
     \renewcommand{\tablename}{Tabela}
     \renewcommand{\listtablename}{Listas de tabelas}
     \renewcommand{\lstlistingname}{Código}
+    \providecommand{\pt@labeltoc}{Sumário}
     \providecommand{\pt@labelquestions}{Perguntas?}
     \providecommand{\pt@labelbackgroundsource}{Fonte da imagem de fundo}
     \providecommand{\pt@labeltemplatecredit}{Modelo do tema}
