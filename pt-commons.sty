@@ -4,8 +4,12 @@
 % Commons %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Packages
+\RequirePackage{adjustbox}
+\RequirePackage{caption}
 \RequirePackage{colortbl}
 \RequirePackage{etoolbox}
+\RequirePackage{float}
+\RequirePackage{fontawesome5}
 \RequirePackage{geometry}
 \RequirePackage{graphicx}
 \RequirePackage{microtype}
@@ -14,6 +18,7 @@
 \RequirePackage{tabularray}
 \RequirePackage{tcolorbox}
 \RequirePackage[absolute,overlay]{textpos}
+\RequirePackage{xstring}
 % Hyperlinks
 \RequirePackage{hyperref}
 \hypersetup{
@@ -88,6 +93,7 @@
     \renewcommand{\tablename}{Tabla}
     \renewcommand{\listtablename}{Lista de tablas}
     \captionsetup[listing]{name=Código}
+    \floatname{filetree}{Árbol de archivos}
     \providecommand{\pt@labeltoc}{Tabla de contenidos}
     \providecommand{\pt@labelquestions}{¿Preguntas?}
     \providecommand{\pt@labelbackgroundsource}{Fotografía de fondo}
@@ -97,6 +103,7 @@
     \renewcommand{\tablename}{Table}
     \renewcommand{\listtablename}{Tables}
     \captionsetup[listing]{name=Code}
+    \floatname{filetree}{File Tree}
     \providecommand{\pt@labeltoc}{Table of Contents}
     \providecommand{\pt@labelquestions}{Questions?}
     \providecommand{\pt@labelbackgroundsource}{Background source}
@@ -106,6 +113,7 @@
     \renewcommand{\tablename}{Tableau}
     \renewcommand{\listtablename}{Liste des tableaux}
     \captionsetup[listing]{name=Code}
+    \floatname{filetree}{Arbre de fichiers}
     \providecommand{\pt@labeltoc}{Table des matières}
     \providecommand{\pt@labelquestions}{Questions ?}
     \providecommand{\pt@labelbackgroundsource}{Source de l'image de fond}
@@ -115,10 +123,96 @@
     \renewcommand{\tablename}{Tabela}
     \renewcommand{\listtablename}{Listas de tabelas}
     \captionsetup[listing]{name=Código}
+    \floatname{filetree}{Árvore de arquivos}
     \providecommand{\pt@labeltoc}{Sumário}
     \providecommand{\pt@labelquestions}{Perguntas?}
     \providecommand{\pt@labelbackgroundsource}{Fonte da imagem de fundo}
     \providecommand{\pt@labeltemplatecredit}{Modelo do tema}
+}
+
+% File Tree %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\RequirePackage{dirtree}
+\DTsetlength{0.1cm}{0.2cm}{0.1cm}{0.4pt}{0pt}
+\setlength{\DTbaselineskip}{0.5cm}
+\renewcommand{\DTstyle}{\ttfamily\scriptsize}
+\renewcommand{\DTstylecomment}{\normalfont\footnotesize}
+\newcommand{\treeicon}[1]{%
+    \begingroup%
+    \newif\if@iconfound%
+    \@iconfoundfalse%
+    \newcommand{\iconbox}[1]{\makebox[0.25cm][c]{\faIcon[scale=#1]{##1}}}%
+    \def\filename{#1}%
+    % Extract extension
+    \StrBehind{\filename}{.}[\ext]%
+    % Empty
+    \IfStrEq{\filename}{}{\iconbox{file}\ \@iconfoundtrue}{}%
+    % Archive
+    \IfStrEq{\ext}{zip}{\iconbox{file-archive}\ #1\@iconfoundtrue}{}%
+    \IfStrEq{\ext}{rar}{\iconbox{file-archive}\ #1\@iconfoundtrue}{}%
+    \IfStrEq{\ext}{tar}{\iconbox{file-archive}\ #1\@iconfoundtrue}{}%
+    \IfStrEq{\ext}{gz}{\iconbox{file-archive}\ #1\@iconfoundtrue}{}%
+    \IfStrEq{\ext}{7z}{\iconbox{file-archive}\ #1\@iconfoundtrue}{}%
+    % Audio
+    \IfStrEq{\ext}{mp3}{\iconbox{file-audio}\ #1\@iconfoundtrue}{}%
+    \IfStrEq{\ext}{wav}{\iconbox{file-audio}\ #1\@iconfoundtrue}{}%
+    \IfStrEq{\ext}{ogg}{\iconbox{file-audio}\ #1\@iconfoundtrue}{}%
+    % Code
+    \IfStrEq{\ext}{c}{\iconbox{file-code}\ #1\@iconfoundtrue}{}%
+    \IfStrEq{\ext}{cpp}{\iconbox{file-code}\ #1\@iconfoundtrue}{}%
+    \IfStrEq{\ext}{h}{\iconbox{file-code}\ #1\@iconfoundtrue}{}%
+    \IfStrEq{\ext}{hpp}{\iconbox{file-code}\ #1\@iconfoundtrue}{}%
+    \IfStrEq{\ext}{java}{\iconbox{file-code}\ #1\@iconfoundtrue}{}%
+    \IfStrEq{\ext}{py}{\iconbox{file-code}\ #1\@iconfoundtrue}{}%
+    \IfStrEq{\ext}{js}{\iconbox{file-code}\ #1\@iconfoundtrue}{}%
+    \IfStrEq{\ext}{ts}{\iconbox{file-code}\ #1\@iconfoundtrue}{}%
+    \IfStrEq{\ext}{css}{\iconbox{file-code}\ #1\@iconfoundtrue}{}%
+    \IfStrEq{\ext}{html}{\iconbox{file-code}\ #1\@iconfoundtrue}{}%
+    \IfStrEq{\ext}{xml}{\iconbox{file-code}\ #1\@iconfoundtrue}{}%
+    \IfStrEq{\ext}{json}{\iconbox{file-code}\ #1\@iconfoundtrue}{}%
+    \IfStrEq{\ext}{sh}{\iconbox{file-code}\ #1\@iconfoundtrue}{}%
+    \IfStrEq{\ext}{rb}{\iconbox{file-code}\ #1\@iconfoundtrue}{}%
+    \IfStrEq{\ext}{php}{\iconbox{file-code}\ #1\@iconfoundtrue}{}%
+    \IfStrEq{\ext}{go}{\iconbox{file-code}\ #1\@iconfoundtrue}{}%
+    \IfStrEq{\ext}{rs}{\iconbox{file-code}\ #1\@iconfoundtrue}{}%
+    \IfStrEq{\ext}{tex}{\iconbox{file-code}\ #1\@iconfoundtrue}{}%
+    % Office
+    \IfStrEq{\ext}{xls}{\iconbox{file-excel}\ #1\@iconfoundtrue}{}%
+    \IfStrEq{\ext}{xlsx}{\iconbox{file-excel}\ #1\@iconfoundtrue}{}%
+    \IfStrEq{\ext}{doc}{\iconbox{file-word}\ #1\@iconfoundtrue}{}%
+    \IfStrEq{\ext}{docx}{\iconbox{file-word}\ #1\@iconfoundtrue}{}%
+    \IfStrEq{\ext}{ppt}{\iconbox{file-powerpoint}\ #1\@iconfoundtrue}{}%
+    \IfStrEq{\ext}{pptx}{\iconbox{file-powerpoint}\ #1\@iconfoundtrue}{}%
+    % Image
+    \IfStrEq{\ext}{jpg}{\iconbox{file-image}\ #1\@iconfoundtrue}{}%
+    \IfStrEq{\ext}{jpeg}{\iconbox{file-image}\ #1\@iconfoundtrue}{}%
+    \IfStrEq{\ext}{png}{\iconbox{file-image}\ #1\@iconfoundtrue}{}%
+    \IfStrEq{\ext}{gif}{\iconbox{file-image}\ #1\@iconfoundtrue}{}%
+    \IfStrEq{\ext}{svg}{\iconbox{file-image}\ #1\@iconfoundtrue}{}%
+    % PDF
+    \IfStrEq{\ext}{pdf}{\iconbox{file-pdf}\ #1\@iconfoundtrue}{}%
+    % Video
+    \IfStrEq{\ext}{mp4}{\iconbox{file-video}\ #1\@iconfoundtrue}{}%
+    \IfStrEq{\ext}{avi}{\iconbox{file-video}\ #1\@iconfoundtrue}{}%
+    \IfStrEq{\ext}{mov}{\iconbox{file-video}\ #1\@iconfoundtrue}{}%
+    \IfStrEq{\ext}{mkv}{\iconbox{file-video}\ #1\@iconfoundtrue}{}%
+    % Default
+    \if@iconfound\else
+        \IfStrEq{\ext}{}{\iconbox{folder-open}\ #1}{\iconbox{file}}%
+    \fi%
+    \endgroup
+}
+\newcommand{\treeiconfirst}[1]{%
+    \hspace{0.1cm}\treeicon{#1}%
+}
+\newfloat{filetree}{htbp}{lof}
+\newenvironment{ptdirtree}{
+    \hspace*{-0.4cm}%
+    \begin{minipage}{.875\columnwidth}
+        \vspace{0.25cm}
+        }{
+        \vspace{0.4cm}
+    \end{minipage}
 }
 
 % Authors handling %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
