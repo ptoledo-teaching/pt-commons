@@ -367,17 +367,17 @@
 % Hooks %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \AtBeginDocument{
-	\IfFileExists{\buildcountfile}{%
-		\newread\file
-		\openin\file=\buildcountfile
-		\read\file to\buildcount
-		\closein\file
-		\ifx\buildcount\empty
-			\def\buildcount{0}
-		\fi
-	}{
-		\def\buildcount{0}
-	}
+    \IfFileExists{\buildcountfile}{%
+        \newread\file
+        \openin\file=\buildcountfile
+        \read\file to\buildcount
+        \closein\file
+        \ifx\buildcount\empty
+            \def\buildcount{0}
+        \fi
+    }{
+        \def\buildcount{0}
+    }
     \ifdefined\pt@watermark%
         \DraftwatermarkOptions{stamp=true}
         \setupwatermark{
