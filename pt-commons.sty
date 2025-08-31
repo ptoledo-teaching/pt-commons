@@ -87,7 +87,7 @@
 \addto\captionsspanish{
     \renewcommand{\tablename}{Tabla}
     \renewcommand{\listtablename}{Lista de tablas}
-    \renewcommand{\lstlistingname}{Código}
+    \captionsetup[listing]{name=Código}
     \providecommand{\pt@labeltoc}{Tabla de contenidos}
     \providecommand{\pt@labelquestions}{¿Preguntas?}
     \providecommand{\pt@labelbackgroundsource}{Fotografía de fondo}
@@ -96,7 +96,7 @@
 \addto\captionsenglish{
     \renewcommand{\tablename}{Table}
     \renewcommand{\listtablename}{Tables}
-    \renewcommand{\lstlistingname}{Code}
+    \captionsetup[listing]{name=Code}
     \providecommand{\pt@labeltoc}{Table of Contents}
     \providecommand{\pt@labelquestions}{Questions?}
     \providecommand{\pt@labelbackgroundsource}{Background source}
@@ -105,7 +105,7 @@
 \addto\captionsfrench{
     \renewcommand{\tablename}{Tableau}
     \renewcommand{\listtablename}{Liste des tableaux}
-    \renewcommand{\lstlistingname}{Code}
+    \captionsetup[listing]{name=Code}
     \providecommand{\pt@labeltoc}{Table des matières}
     \providecommand{\pt@labelquestions}{Questions ?}
     \providecommand{\pt@labelbackgroundsource}{Source de l'image de fond}
@@ -114,7 +114,7 @@
 \addto\captionsportuguese{
     \renewcommand{\tablename}{Tabela}
     \renewcommand{\listtablename}{Listas de tabelas}
-    \renewcommand{\lstlistingname}{Código}
+    \captionsetup[listing]{name=Código}
     \providecommand{\pt@labeltoc}{Sumário}
     \providecommand{\pt@labelquestions}{Perguntas?}
     \providecommand{\pt@labelbackgroundsource}{Fonte da imagem de fundo}
@@ -303,34 +303,28 @@
 
 % Code styling %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\RequirePackage{listings}
-\lstset{
-    basicstyle=\small\ttfamily,
-    backgroundcolor=\color{gray!10},
-    keywordstyle=\color{blue},
-    commentstyle=\color{green!40!black},
-    stringstyle=\color{red},
-    rulecolor=\color{gray},
-    frame=single,
-    framerule=0pt,
-    framesep=2pt,
-    captionpos=b,
-    aboveskip=10pt,
-    belowskip=5pt,
-    columns=fullflexible,
-    keepspaces=true,
-    numberstyle=\color{black},
-    numbers=left,
-    stepnumber=1,
+\RequirePackage{fancyvrb}
+\RequirePackage[outputdir=tmp]{minted}
+\setminted{
+    bgcolor=ptgray!42,
+    fontfamily=tt,
+    fontsize=\scriptsize,
+    autogobble=true,
+    linenos=true,
+    tabsize=4,
     numbersep=5pt,
-    showstringspaces=false,
+    baselinestretch=1.0,
+    showspaces=false,
 }
-\lstdefinestyle{print}{
-    basicstyle=\color{black}\small\ttfamily,
-    keywordstyle=\color{black},
-    commentstyle=\color{black},
-    stringstyle=\color{black},
-    identifierstyle=\color{black}
+\newenvironment{ptprintcode}[1]{%
+    \VerbatimEnvironment
+    \begin{minted}[
+    style=bw,
+    bgcolor=white,
+    frame=single,
+    ]{#1}%
+}{%
+  \end{minted}%
 }
 
 % Watermark %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
