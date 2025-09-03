@@ -28,7 +28,8 @@
 }
 \renewcommand{\UrlFont}{\normalfont}
 % Commands
-\newcommand{\inlinecode}[1]{{\ttfamily\bfseries\footnotesize\detokenize{#1}}}
+\newcommand{\inlinecode}[1]{{\ttfamily\bfseries\detokenize{#1}}}
+\renewcommand{\texttt}[1]{\inlinecode{#1}}
 \newcommand{\todayymd}{\the\year/\twodigits\month/\twodigits\day}
 % Number to 2 digits number for dats
 \newcommand{\twodigits}[1]{%
@@ -80,7 +81,7 @@
 % Fonts
 \RequirePackage[sfdefault,tabular,scaled=.85]{FiraSans}
 \RequirePackage{fix-cm}
-\RequirePackage[scaled=0.9]{inconsolata}
+\RequirePackage[scaled=0.85]{inconsolata}
 % Language
 \newcommand{\pt@language}{spanish}
 \DeclareOption{english}{\renewcommand\pt@language{english}}
@@ -374,7 +375,7 @@
 % Tables styling %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \BeforeBeginEnvironment{tblr}{\centering}
-\AtBeginEnvironment{tblr}{\footnotesize}
+\AtBeginEnvironment{tblr}{\small}
 \newcommand{\cellrotated}[1]{\rotatebox{90}{#1\hspace{4pt}}}
 \SetTblrInner{rowsep=0.6pt}
 \SetTblrInner{colsep=3pt}
@@ -402,7 +403,7 @@
 \setminted{
     bgcolor=ptgray!42,
     fontfamily=tt,
-    fontsize=\scriptsize,
+    fontsize=\small,
     autogobble=true,
     linenos=true,
     tabsize=4,
@@ -420,6 +421,8 @@
 }{%
   \end{minted}%
 }
+\newcommand{\ptcodecaption}[1]{\captionof{listing}{#1}}
+\newcommand{\ptcodecaptionsame}[1]{\addtocounter{listing}{-1}\captionof{listing}{#1}}
 
 % Watermark %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
