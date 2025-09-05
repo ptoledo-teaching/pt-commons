@@ -5,7 +5,6 @@
 
 % Packages
 \RequirePackage{adjustbox}
-\RequirePackage{caption}
 \RequirePackage{colortbl}
 \RequirePackage{etoolbox}
 \RequirePackage{float}
@@ -27,6 +26,16 @@
     urlcolor=ptlightblue
 }
 \renewcommand{\UrlFont}{\normalfont}
+% Captions handling
+\RequirePackage{caption}
+\captionsetup{
+    justification=justified,
+    singlelinecheck=false,
+}
+\setlength{\abovecaptionskip}{-0.1cm}
+\setlength{\belowcaptionskip}{0.25cm}
+\newcommand{\ptcaption}[2]{\captionof{#1}{#2}}
+\newcommand{\ptcaptionsame}[2]{\addtocounter{#1}{-1}\captionof{#1}{#2}}
 % Commands
 \newcommand{\inlinecode}[1]{{\ttfamily\bfseries\detokenize{#1}}}
 \renewcommand{\texttt}[1]{\inlinecode{#1}}
@@ -421,8 +430,6 @@
 }{%
   \end{minted}%
 }
-\newcommand{\ptcodecaption}[1]{\captionof{listing}{#1}}
-\newcommand{\ptcodecaptionsame}[1]{\addtocounter{listing}{-1}\captionof{listing}{#1}}
 
 % Watermark %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
