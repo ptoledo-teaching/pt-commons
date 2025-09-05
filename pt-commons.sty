@@ -408,7 +408,7 @@
 % Code styling %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \RequirePackage{fancyvrb}
-\RequirePackage[outputdir=tmp]{minted}
+\RequirePackage{minted}
 \setminted{
     bgcolor=ptgray!42,
     fontfamily=tt,
@@ -417,8 +417,9 @@
     linenos=true,
     tabsize=4,
     numbersep=5pt,
-    baselinestretch=1.0,
+    baselinestretch=0.75,
     showspaces=false,
+    vspace=0.25cm,
 }
 \newenvironment{ptprintcode}[1]{%
     \VerbatimEnvironment
