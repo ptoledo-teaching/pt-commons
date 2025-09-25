@@ -82,7 +82,7 @@
 \newcommand{\school}[1]{\newcommand{\pt@school}{#1}}
 \newcommand{\university}[1]{\newcommand{\pt@university}{#1}}
 
-% Fonts, encoding and language %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Fonts and encoding %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Encoding
 \RequirePackage[utf8]{inputenc}
@@ -91,18 +91,26 @@
 \RequirePackage[sfdefault,tabular,scaled=.85]{FiraSans}
 \RequirePackage{fix-cm}
 \RequirePackage[scaled=0.85]{inconsolata}
-% Language
+
+% Language %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 \newcommand{\pt@language}{spanish}
 \DeclareOption{english}{\renewcommand\pt@language{english}}
 \DeclareOption{portuguese}{\renewcommand\pt@language{portuguese}}
 \DeclareOption{french}{\renewcommand\pt@language{french}}
 \ProcessOptions\relax
 \RequirePackage[\pt@language]{babel}
+% Listing caption setup if listings package is loaded
+\newcommand{\pt@captionsetup@listing}[1]{%
+  \@ifundefined{lstlisting}{}{%
+    \captionsetup[listing]{#1}%
+  }%
+}
 % Language specific commands
 \addto\captionsspanish{
     \renewcommand{\tablename}{Tabla}
     \renewcommand{\listtablename}{Lista de tablas}
-    \captionsetup[listing]{name=Código}
+    \pt@captionsetup@listing{name=Código}
     \floatname{filetree}{Árbol de archivos}
     \providecommand{\pt@labeltoc}{Tabla de contenidos}
     \providecommand{\pt@labelquestions}{¿Preguntas?}
@@ -112,7 +120,7 @@
 \addto\captionsenglish{
     \renewcommand{\tablename}{Table}
     \renewcommand{\listtablename}{Tables}
-    \captionsetup[listing]{name=Code}
+    \pt@captionsetup@listing{name=Code}
     \floatname{filetree}{File Tree}
     \providecommand{\pt@labeltoc}{Table of Contents}
     \providecommand{\pt@labelquestions}{Questions?}
@@ -122,7 +130,7 @@
 \addto\captionsfrench{
     \renewcommand{\tablename}{Tableau}
     \renewcommand{\listtablename}{Liste des tableaux}
-    \captionsetup[listing]{name=Code}
+    \pt@captionsetup@listing{name=Code}
     \floatname{filetree}{Arbre de fichiers}
     \providecommand{\pt@labeltoc}{Table des matières}
     \providecommand{\pt@labelquestions}{Questions ?}
@@ -132,7 +140,7 @@
 \addto\captionsportuguese{
     \renewcommand{\tablename}{Tabela}
     \renewcommand{\listtablename}{Listas de tabelas}
-    \captionsetup[listing]{name=Código}
+    \pt@captionsetup@listing{name=Código}
     \floatname{filetree}{Árvore de arquivos}
     \providecommand{\pt@labeltoc}{Sumário}
     \providecommand{\pt@labelquestions}{Perguntas?}
