@@ -339,6 +339,17 @@
     \advance\count1 by 1
     \repeat
 }
+\ExplSyntaxOn
+\newcommand{\titleauthorstable}{%
+    \begin{tabular}{r|l}%
+        \int_step_inline:nnn{1}{\value{authorindex}}{%
+        \csname authornamefull##1\endcsname & \csname authordetails##1\endcsname \\%
+        \csname authoremailurl##1\endcsname &                                    %
+        \int_compare:nNnF{##1}={\value{authorindex}}{                            \\}%
+        }                                                                        \\%
+    \end{tabular}%
+}
+\ExplSyntaxOff
 
 % Graphics %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
