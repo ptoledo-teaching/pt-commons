@@ -27,13 +27,11 @@
 }
 \renewcommand{\UrlFont}{\normalfont}
 % Captions handling
-\RequirePackage{caption}
+\RequirePackage[hypcap=false]{caption}
 \captionsetup{
     justification=justified,
     singlelinecheck=true
 }
-\setlength{\abovecaptionskip}{-0.1cm}
-\setlength{\belowcaptionskip}{0.25cm}
 \newcommand{\ptcaption}[2]{\captionof{#1}{#2}}
 \newcommand{\ptcaptionsame}[2]{\addtocounter{#1}{-1}\captionof{#1}{#2}}
 % Commands
