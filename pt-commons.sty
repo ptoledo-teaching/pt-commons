@@ -182,7 +182,7 @@
     \begingroup%
     \newif\if@iconfound%
     \@iconfoundfalse%
-    \newcommand{\iconbox}[1]{\makebox[0.25cm][c]{\faIcon[scale=#1]{##1}}}%
+    \newcommand{\iconbox}[1]{\makebox[0.25cm][c]{\faIcon[regular]{##1}}}%
     \def\filename{#1}%
     % Extract extension
     \StrBehind{\filename}{.}[\ext]%
