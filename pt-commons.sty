@@ -100,9 +100,9 @@
 \RequirePackage[\pt@language]{babel}
 % Listing caption setup if listings package is loaded
 \newcommand{\pt@captionsetup@listing}[1]{%
-  \@ifundefined{lstlisting}{}{%
-    \captionsetup[listing]{#1}%
-  }%
+    \@ifundefined{lstlisting}{}{%
+        \captionsetup[listing]{#1}%
+    }%
 }
 % Language specific commands
 \addto\captionsspanish{
