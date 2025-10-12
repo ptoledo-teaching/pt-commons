@@ -149,6 +149,28 @@
     \providecommand{\pt@labeltemplatecredit}{Modelo do tema}
 }
 
+% Tables of contents, figures, tables and listings %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\RequirePackage{totcount}
+\regtotcounter{table}
+\regtotcounter{figure}
+\regtotcounter{listing}
+\newcommand{\ptlistoftables}{
+    \ifnum \totvalue{table}>0
+        \listoftables
+    \fi
+}
+\newcommand{\ptlistoffigures}{
+    \ifnum \totvalue{figure}>0
+        \listoffigures
+    \fi
+}
+\newcommand{\ptlistofcodes}{%
+    \ifnum \totvalue{listing}>0
+        \lstlistoflistings
+    \fi
+}
+
 % File Tree %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \RequirePackage{dirtree}
