@@ -405,9 +405,9 @@
 \newcommand{\backgroundcredit}[1]{\newcommand{\pt@backgroundcredit}{#1}}
 \def\pt@logo{}
 \ifdefined\logo%
-    \renewcommand{\logo}[1]{\def\pt@logo{##1}}%
+    \renewcommand{\logo}[1]{\def\pt@logo{#1}}%
 \else%
-    \newcommand{\logo}[1]{\def\pt@logo{##1}}%
+    \newcommand{\logo}[1]{\def\pt@logo{#1}}%
 \fi
 % Fading
 \RequirePackage{tikz}
