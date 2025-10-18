@@ -1,7 +1,7 @@
 # PT Commons Package
 
-**Version:** 1.1  
-**Date:** 2025/04/21  
+**Version:** 0.1  
+**Date:** 2025/10/18  
 **Author:** Pedro Toledo Correa  
 **License:** MIT License  
 **Repository:** [GitHub - pt-latex/pt-commons](https://github.com/ptoledo-teaching/pt-commons)

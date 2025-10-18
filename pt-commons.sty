@@ -1,5 +1,25 @@
+%%
+%% pt-commons.sty
+%% Common macros and layout tools for PT document classes
+%%
+%% Author: Pedro Toledo Correa
+%% Repo: https://github.com/ptoledo-teaching/pt-commons
+%% License: MIT License
+%% Created: 2024-07-10
+%% Updated: 2025-10-18
+%% Version: v0.1
+%%
+%% -----------------------------------------------------------------
+%% This work may be distributed and/or modified under
+%% the conditions of the LaTeX Project Public License,
+%% version 1.3c or later. The latest version is available at:
+%%     https://www.latex-project.org/lppl.txt
+%% -----------------------------------------------------------------
+%%
+
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{pt-commons}[2025/04/21 v1.1 PT Commons Package]
+\makeatletter
+\ProvidesPackage{pt-commons}[2025/10/18 v0.1 PT Commons Package]
 
 % Commons %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -19,7 +39,6 @@
 \RequirePackage{tcolorbox}
 \RequirePackage[absolute,overlay]{textpos}
 \RequirePackage{xstring}
-\makeatletter
 \@ifclassloaded{beamer}{}{%
     \RequirePackage{geometry} % Geometry package conflicts with beamer
     \RequirePackage[hypcap=false]{caption}% Beamer manages captions itself
@@ -30,7 +49,6 @@
     \newcommand{\ptcaption}[2]{\captionof{#1}{#2}}%
     \newcommand{\ptcaptionsame}[2]{\addtocounter{#1}{-1}\captionof{#1}{#2}}%
 }%
-\makeatother
 % Commands
 \newcommand{\inlinecode}[1]{{\ttfamily\bfseries #1}}
 \newcommand{\twodigits}[1]{% Number to 2 digits number for dates
@@ -60,7 +78,6 @@
         \jobname.buildcount%
     \fi
 }
-\makeatletter
 \newcommand{\pt@writebuildcount}{%
     \newwrite\pt@buildfile%
     \immediate\openout\pt@buildfile=\buildcountfile%
@@ -68,7 +85,6 @@
     \immediate\write\pt@buildfile{\pt@next}%
     \immediate\closeout\pt@buildfile%
 }
-\makeatother
 \renewcommand{\date}[1]{\newcommand{\pt@date}{#1}}
 % Document title
 \renewcommand{\title}[1]{\newcommand{\pt@title}{#1}}
@@ -98,11 +114,10 @@
 % Fonts
 \RequirePackage[sfdefault,tabular,scaled=.85]{FiraSans}
 \RequirePackage{fix-cm}
-\RequirePackage[scaled=0.85]{inconsolata}
+\RequirePackage[scaled=0.85]{beramono}
+
 % Links
-\makeatletter
-\@ifpackageloaded{hyperref}{}{\RequirePackage{hyperref}} % Guard if already loaded, e.g., beamer
-\makeatother
+\@ifpackageloaded{hyperref}{}{\RequirePackage[colorlinks]{hyperref}} % Guard if already loaded, e.g., beamer
 \renewcommand{\UrlFont}{\normalfont} % Set URL font to normal
 
 % Language %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -171,9 +186,7 @@
 \regtotcounter{table}
 \regtotcounter{figure}
 % Register listing counter only if provided (by listings)
-\makeatletter
 \@ifundefined{c@listing}{}{\regtotcounter{listing}}
-\makeatother
 \newcommand{\ptlistoftables}{
     \ifnum \totvalue{table}>0
         \listoftables
@@ -185,9 +198,7 @@
     \fi
 }
 \newcommand{\ptlistofcodes}{%
-    \makeatletter
     \@ifundefined{lstlistoflistings}{}{\ifnum \totvalue{listing}>0\relax \lstlistoflistings \fi}%
-    \makeatother
 }
 
 % File Tree %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -524,7 +535,7 @@
 \else
     % Fallback when minted is disabled: simple verbatim block
     \newenvironment{ptprintcode}[1]{\Verbatim}{\endVerbatim}
-
+    
 \fi
 
 % Watermark %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -580,7 +591,6 @@
     }
     % Apply link colors after colors are defined
     \hypersetup{%
-        colorlinks,%
         linkcolor=ptlightblue,%
         urlcolor=ptlightblue%
     }
@@ -605,3 +615,5 @@
 \AtEndDocument{
     \pt@writebuildcount
 }
+
+\makeatother

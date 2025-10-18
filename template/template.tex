@@ -1,0 +1,364 @@
+\documentclass[11pt,letterpaper]{article}
+
+\usepackage{pt-commons}
+
+% Document metadata
+\version{1.0}
+\build{auto}
+\title{PT-Commons Package}
+\titlesub{Feature Demonstration Document}
+\titlesubsub{\docversion\ - \today}
+\watermark{DEMO}
+
+% Class/Course information (optional)
+\classcode{PKG-001}
+\classsemester{2025-2}
+\classname{Package Documentation}
+
+% Institution information (optional)
+\workgroup{Development Team}
+\department{LaTeX Templates}
+\university{PT Teaching}
+
+% Logo (optional - comment out if file doesn't exist)
+% \logo{path/to/logo.png}
+
+% Authors
+\addauthor{Pablo}{Toledo}{pablo.toledo@example.com}{Lead Developer, PT Teaching}
+\addauthor{Jane}{Doe}{jane.doe@example.com}{Contributor}
+
+\begin{document}
+
+\section{Introduction}
+
+This document demonstrates all the features available in the \textbf{pt-commons} package. The package provides a comprehensive set of utilities for creating professional LaTeX documents with consistent styling and formatting.
+
+\subsection{Document Metadata Commands}
+
+The following metadata commands are available:
+
+\begin{itemize}
+    \item \inlinecode{\textbackslash version\{1.0\}} - Document version
+    \item \inlinecode{\textbackslash build\{auto\}} - Build number (auto-increments)
+    \item \inlinecode{\textbackslash title\{...\}} - Main title
+    \item \inlinecode{\textbackslash titlesub\{...\}} - Subtitle
+    \item \inlinecode{\textbackslash titlesubsub\{...\}} - Sub-subtitle
+    \item \inlinecode{\textbackslash watermark\{DEMO\}} - Watermark text
+\end{itemize}
+
+\subsection{Author Management}
+
+Authors are added using \inlinecode{\textbackslash addauthor}:
+
+\begin{verbatim}
+\addauthor{FirstName}{LastName}{email}{affiliation}
+\end{verbatim}
+
+Current authors: \titleauthorsnames{, }
+
+\section{Colors}
+
+The package defines several predefined colors:
+
+\begin{itemize}
+    \item \textcolor{ptred}{ptred} - Main red color
+    \item \textcolor{ptdarkred}{ptdarkred} - Dark red variant
+    \item \textcolor{ptlightblue}{ptlightblue} - Light blue color
+    \item \textcolor{ptblue}{ptblue} - Main blue color
+    \item \textcolor{ptdarkblue}{ptdarkblue} - Dark blue variant
+    \item \textcolor{ptgreen}{ptgreen} - Main green color
+    \item \textcolor{ptdarkgreen}{ptdarkgreen} - Dark green variant
+    \item \textcolor{ptyellow}{ptyellow} - Main yellow color
+    \item \textcolor{ptdarkyellow}{ptdarkyellow} - Dark yellow variant
+    \item \textcolor{ptgray}{ptgray} - Light gray color
+    \item \textcolor{ptdarkgray}{ptdarkgray} - Dark gray color
+\end{itemize}
+
+\section{Typography}
+
+\subsection{Inline Code}
+
+Use \inlinecode{\textbackslash inlinecode\{text\}} for inline code: \inlinecode{import numpy as np}
+
+\subsection{Text Formatting}
+
+The package uses \textbf{Fira Sans} as the default font with proper scaling and microtype optimization for improved readability.
+
+\section{Tables}
+
+The package provides enhanced table commands using tabularray:
+
+\begin{center}
+    \begin{tblr}{
+        colspec = {X[2]X[1]X[1]},
+        row{1} = {ptblue!42, c, font=\bfseries},
+        hlines,
+        vlines
+        }
+        \tableheader Feature & Status    & Version \\
+        Color Definitions    & Available & 1.0     \\
+        Table Styling        & Available & 1.0     \\
+        Code Highlighting    & Available & 1.0     \\
+        File Trees           & Available & 1.0     \\
+        Graphics             & Available & 1.0     \\
+    \end{tblr}
+\end{center}
+
+\subsection{Table Commands}
+
+Special table commands available:
+\begin{itemize}
+    \item \inlinecode{\textbackslash tableheader} - Header row styling
+    \item \inlinecode{\textbackslash tablesubheader} - Subheader styling
+    \item \inlinecode{\textbackslash tablecellleft} - Left-aligned cell
+    \item \inlinecode{\textbackslash tablecellcenter} - Center-aligned cell
+    \item \inlinecode{\textbackslash tablecellright} - Right-aligned cell
+    \item \inlinecode{\textbackslash tablecellbold} - Bold cell content
+    \item \inlinecode{\textbackslash tablecellrotated} - Rotated cell (90°)
+\end{itemize}
+
+\section{File Trees}
+
+Display directory structures using the \texttt{dirtree} environment with custom icons:
+
+\begin{filetree}
+    \ptcaption{filetree}{Example Project Structure}
+    \label{tree:example}
+    \begin{ptdirtree}
+        \dirtree{%
+            .1 \treeiconfirst{project/}.
+            .2 \treeicon{src/}.
+            .3 \treeicon{main.py}.
+            .3 \treeicon{utils.py}.
+            .3 \treeicon{config.json}.
+            .2 \treeicon{docs/}.
+            .3 \treeicon{README.md}.
+            .3 \treeicon{manual.pdf}.
+            .2 \treeicon{tests/}.
+            .3 \treeicon{testmain.py}.
+            .2 \treeicon{requirements.txt}.
+            .2 \treeicon{setup.py}.
+        }
+    \end{ptdirtree}
+\end{filetree}
+
+Icons are automatically assigned based on file extensions:
+\begin{itemize}
+    \item Archive files (.zip, .tar, .gz)
+    \item Audio files (.mp3, .wav)
+    \item Code files (.py, .js, .cpp, .java, etc.)
+    \item Office files (.xls, .doc, .ppt)
+    \item Images (.jpg, .png, .svg)
+    \item PDF files (.pdf)
+    \item Video files (.mp4, .avi)
+\end{itemize}
+
+\section{Code Environments}
+
+\subsection{Inline Code}
+
+Use \inlinecode{import numpy as np} for short code snippets.
+
+\subsection{Print Code (Black \& White)}
+
+For code that should be printed without syntax highlighting:
+
+\begin{ptprintcode}{python}
+    def hello_world():
+    """A simple greeting function."""
+    print("Hello, World!")
+    return True
+
+    if __name__ == "__main__":
+    hello_world()
+\end{ptprintcode}
+
+\subsection{Minted Code (with highlighting)}
+
+For syntax-highlighted code (requires minted package):
+
+\begin{minted}{python}
+import numpy as np
+import matplotlib.pyplot as plt
+
+def plot_sine_wave(freq=1.0, phase=0.0):
+    """Plot a sine wave with given frequency and phase."""
+    x = np.linspace(0, 2*np.pi, 1000)
+    y = np.sin(freq * x + phase)
+    
+    plt.figure(figsize=(10, 4))
+    plt.plot(x, y, 'b-', linewidth=2)
+    plt.grid(True, alpha=0.3)
+    plt.xlabel('x')
+    plt.ylabel('sin(x)')
+    plt.title(f'Sine Wave (freq={freq}, phase={phase})')
+    plt.show()
+\end{minted}
+
+\section{Graphics and Plots}
+
+\subsection{Color Definitions}
+
+The package provides color utilities for pgfplots and tikz graphics. All predefined colors (ptred, ptblue, ptgreen, etc.) are available for use in graphics.
+
+\subsection{Example Plot}
+
+\begin{center}
+    \begin{tikzpicture}
+        \begin{axis}[
+                width=0.8\linewidth,
+                height=6cm,
+                xlabel={$x$},
+                ylabel={$f(x)$},
+                grid=major,
+                legend pos=north west,
+            ]
+            \addplot[ptblue, thick, domain=0:10, samples=100] {sin(deg(x))};
+            \addplot[ptred, thick, domain=0:10, samples=100] {cos(deg(x))};
+            \addplot[ptgreen, thick, domain=0:10, samples=100] {sin(deg(x))*cos(deg(x))};
+            \legend{$\sin(x)$, $\cos(x)$, $\sin(x)\cos(x)$}
+        \end{axis}
+    \end{tikzpicture}
+\end{center}
+
+\section{Lists and Enumeration}
+
+\subsection{Itemized Lists}
+
+Bullet points are automatically styled:
+
+\begin{itemize}
+    \item First level item
+          \begin{itemize}
+              \item Second level item
+                    \begin{itemize}
+                        \item Third level item
+                    \end{itemize}
+          \end{itemize}
+    \item Another first level item
+\end{itemize}
+
+\subsection{Enumerated Lists}
+
+Numbered lists are also supported:
+
+\begin{enumerate}
+    \item First numbered item
+          \begin{enumerate}
+              \item Nested numbered item
+              \item Another nested item
+          \end{enumerate}
+    \item Second numbered item
+    \item Third numbered item
+\end{enumerate}
+
+\section{Utility Commands}
+
+\subsection{Date Formatting}
+
+\begin{itemize}
+    \item Current date (YYYY/MM/DD format): \todayymd
+    \item Document version: \docversion
+\end{itemize}
+
+\subsection{List of Contents}
+
+The package provides smart list commands that only appear if content exists:
+
+\begin{itemize}
+    \item \inlinecode{\textbackslash ptlistoftables} - Only shows if tables exist
+    \item \inlinecode{\textbackslash ptlistoffigures} - Only shows if figures exist
+    \item \inlinecode{\textbackslash ptlistofcodes} - Only shows if code listings exist
+\end{itemize}
+
+\section{Multi-language Support}
+
+The package supports multiple languages:
+
+\begin{itemize}
+    \item Spanish (default): \texttt{spanish}
+    \item English: \texttt{english} option
+    \item Portuguese: \texttt{portuguese} option
+    \item French: \texttt{french} option
+\end{itemize}
+
+Example usage: \texttt{\textbackslash usepackage[english]\{pt-commons\}}
+
+\section{Customization Options}
+
+\subsection{Package Options}
+
+\begin{itemize}
+    \item \texttt{english} - Use English language
+    \item \texttt{portuguese} - Use Portuguese language
+    \item \texttt{french} - Use French language
+    \item \texttt{nominted} - Disable minted package (use basic verbatim instead)
+\end{itemize}
+
+\subsection{Document Structure Commands}
+
+For class/course documents:
+\begin{itemize}
+    \item \inlinecode{\textbackslash classcode\{...\}} - Course code
+    \item \inlinecode{\textbackslash classsemester\{...\}} - Semester
+    \item \inlinecode{\textbackslash classname\{...\}} - Course name
+\end{itemize}
+
+For institutional documents:
+\begin{itemize}
+    \item \inlinecode{\textbackslash workgroup\{...\}} - Working group
+    \item \inlinecode{\textbackslash department\{...\}} - Department
+    \item \inlinecode{\textbackslash school\{...\}} - School
+    \item \inlinecode{\textbackslash university\{...\}} - University
+\end{itemize}
+
+For corporate documents:
+\begin{itemize}
+    \item \inlinecode{\textbackslash corporationname\{...\}} - Company name
+    \item \inlinecode{\textbackslash corporationdepartment\{...\}} - Department
+\end{itemize}
+
+\section{Advanced Features}
+
+\subsection{Build Counter}
+
+The package automatically tracks build numbers when \inlinecode{\textbackslash build\{auto\}} is used. The counter is stored in a file named \texttt{jobname.buildcount} or \texttt{jobnameVERSION.buildcount} if a version is specified.
+
+\subsection{Watermarks}
+
+Watermarks are automatically sized and rotated at 45°. The watermark includes version and build information if specified.
+
+\subsection{Hyperlinks}
+
+All hyperlinks are automatically colored using the ptlightblue color scheme for both internal links and URLs.
+
+\section{Conclusion}
+
+The pt-commons package provides a comprehensive set of features for creating professional LaTeX documents. It includes:
+
+\begin{itemize}
+    \item Consistent color schemes and typography
+    \item Enhanced table formatting with tabularray
+    \item File tree visualization with automatic icons
+    \item Code highlighting support (minted)
+    \item Multi-language support
+    \item Document metadata and versioning
+    \item Author management
+    \item Automatic watermarking
+    \item Build counter tracking
+    \item Customizable styling
+\end{itemize}
+
+For more information, visit the project repository or consult the package documentation.
+
+\section*{Package Information}
+
+\begin{itemize}
+    \item \textbf{Package}: pt-commons
+    \item \textbf{Version}: 1.1
+    \item \textbf{Date}: 2025/04/21
+    \item \textbf{Author}: PT Teaching
+    \item \textbf{License}: Open Source
+\end{itemize}
+
+\end{document}
