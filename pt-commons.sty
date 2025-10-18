@@ -184,19 +184,22 @@
 % Tables of contents, figures, tables and listings %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \RequirePackage{totcount}
-\regtotcounter{table}
-\regtotcounter{figure}
-% Register listing counter only if provided (by listings)
+\@ifundefined{c@table}{}{\regtotcounter{table}}
+\@ifundefined{c@figure}{}{\regtotcounter{figure}}
 \@ifundefined{c@listing}{}{\regtotcounter{listing}}
-\newcommand{\ptlistoftables}{
-    \ifnum \totvalue{table}>0
-        \listoftables
-    \fi
+\newcommand{\ptlistoftables}{%
+    \@ifundefined{c@table}{}{%
+        \ifnum \totvalue{table}>0
+            \listoftables
+        \fi
+    }%
 }
-\newcommand{\ptlistoffigures}{
-    \ifnum \totvalue{figure}>0
-        \listoffigures
-    \fi
+\newcommand{\ptlistoffigures}{%
+    \@ifundefined{c@figure}{}{%
+        \ifnum \totvalue{figure}>0
+            \listoffigures
+        \fi
+    }%
 }
 \newcommand{\ptlistofcodes}{%
     \@ifundefined{lstlistoflistings}{}{\ifnum \totvalue{listing}>0\relax \lstlistoflistings \fi}%
