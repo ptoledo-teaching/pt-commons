@@ -537,6 +537,21 @@
     
 \fi
 
+% Enhanced environments %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Highlight box for important content
+\newenvironment{highlightbox}{%
+    \begin{tcolorbox}[
+            colback=ptblue!14,
+            colframe=ptblue,
+            boxrule=0.4pt,
+            arc=3pt,
+            outer arc=3pt
+        ]
+        }{
+    \end{tcolorbox}
+}
+
 % Watermark %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \RequirePackage[stamp=false]{draftwatermark}
