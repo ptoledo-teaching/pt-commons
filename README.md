@@ -3,7 +3,7 @@
 **Version:** 0.1  
 **Date:** 2025/10/18  
 **Author:** Pedro Toledo Correa  
-**License:** MIT License  
+**License:** LaTeX Project Public License 1.3c or later  
 **Repository:** [GitHub - pt-latex/pt-commons](https://github.com/ptoledo-teaching/pt-commons)
 
 A comprehensive LaTeX package providing common functionality, styling, and utilities for academic and professional documents. This package serves as a foundation for the PT document class family (pt-article, pt-book, pt-report, pt-slides, pt-letter).
