@@ -497,13 +497,7 @@
         font=\bfseries
     }
 }
-\NewTableCommand\tablecellrotated{
-    \SetCell{
-        rotate=90,
-        halign=c,
-        valign=c
-    }
-}
+\newcommand{\tablecellrotated}[1]{\rotatebox{90}{#1\hspace{4pt}}}
 
 % Code styling %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
