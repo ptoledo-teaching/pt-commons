@@ -1,5 +1,5 @@
-\ProvidesPackage{pt-commons}[2025/04/21 v1.0 PT Commons Package]
 \NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{pt-commons}[2025/04/21 v1.1 PT Commons Package]
 
 % Commons %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -11,7 +11,6 @@
 \RequirePackage{expl3}
 \RequirePackage{float}
 \RequirePackage{fontawesome5}
-\RequirePackage{geometry}
 \RequirePackage{graphicx}
 \RequirePackage{microtype}
 \RequirePackage{newtxsf}
@@ -20,53 +19,57 @@
 \RequirePackage{tcolorbox}
 \RequirePackage[absolute,overlay]{textpos}
 \RequirePackage{xstring}
-% Hyperlinks
-\RequirePackage{hyperref}
-\hypersetup{
-    colorlinks,
-    linkcolor=ptlightblue,
-    urlcolor=ptlightblue
-}
-\renewcommand{\UrlFont}{\normalfont}
-% Captions handling
-\RequirePackage[hypcap=false]{caption}
-\captionsetup{
-    justification=justified,
-    singlelinecheck=true
-}
-\newcommand{\ptcaption}[2]{\captionof{#1}{#2}}
-\newcommand{\ptcaptionsame}[2]{\addtocounter{#1}{-1}\captionof{#1}{#2}}
+\makeatletter
+\@ifclassloaded{beamer}{}{%
+    \RequirePackage{geometry} % Geometry package conflicts with beamer
+    \RequirePackage[hypcap=false]{caption}% Beamer manages captions itself
+    \captionsetup{%
+        justification=justified,%
+        singlelinecheck=true%
+    }%
+    \newcommand{\ptcaption}[2]{\captionof{#1}{#2}}%
+    \newcommand{\ptcaptionsame}[2]{\addtocounter{#1}{-1}\captionof{#1}{#2}}%
+}%
+\makeatother
 % Commands
 \newcommand{\inlinecode}[1]{{\ttfamily\bfseries #1}}
-\newcommand{\todayymd}{\the\year/\twodigits\month/\twodigits\day}
-% Number to 2 digits number for dates
-\newcommand{\twodigits}[1]{%
+\newcommand{\twodigits}[1]{% Number to 2 digits number for dates
     \ifnum#1<10%
         0%
     \fi%
     \the#1%
 }
+\newcommand{\todayymd}{\the\year/\twodigits\month/\twodigits\day}
 
 % Document metadata commands %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Version control
 \newcommand{\version}[1]{\newcommand{\pt@version}{#1}}
 \newcommand{\build}[1]{\newcommand{\pt@build}{#1}}
-\renewcommand{\date}[1]{\newcommand{\pt@date}{#1}}
-\newcommand{\docversion}{
+\newcommand{\docversion}{%
     \ifdefined\pt@version%
-        v\pt@version
+        v\pt@version%
     \else%
-        NA
+        NA%
     \fi%
 }
-\newcommand{\buildcountfile}{
-    \ifdefined\pt@version
-        \jobname\pt@version.buildcount
-    \else
-        \jobname.buildcount
+\newcommand{\buildcountfile}{%
+    \ifdefined\pt@version%
+        \jobname\pt@version.buildcount%
+    \else%
+        \jobname.buildcount%
     \fi
 }
+\makeatletter
+\newcommand{\pt@writebuildcount}{%
+    \newwrite\pt@buildfile%
+    \immediate\openout\pt@buildfile=\buildcountfile%
+    \edef\pt@next{\number\numexpr\buildcount+1\relax}%
+    \immediate\write\pt@buildfile{\pt@next}%
+    \immediate\closeout\pt@buildfile%
+}
+\makeatother
+\renewcommand{\date}[1]{\newcommand{\pt@date}{#1}}
 % Document title
 \renewcommand{\title}[1]{\newcommand{\pt@title}{#1}}
 \newcommand{\titlesub}[1]{\newcommand{\pt@titlesub}{#1}}
@@ -86,26 +89,38 @@
 
 % Fonts and encoding %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% Encoding
-\RequirePackage[utf8]{inputenc}
-\RequirePackage[T1]{fontenc}
+% Encoding (Only load if using PDFTeX)
+\RequirePackage{iftex}
+\ifPDFTeX
+    \RequirePackage[utf8]{inputenc}
+    \RequirePackage[T1]{fontenc}
+\fi
 % Fonts
 \RequirePackage[sfdefault,tabular,scaled=.85]{FiraSans}
 \RequirePackage{fix-cm}
 \RequirePackage[scaled=0.85]{inconsolata}
+% Links
+\makeatletter
+\@ifpackageloaded{hyperref}{}{\RequirePackage{hyperref}} % Guard if already loaded, e.g., beamer
+\makeatother
+\renewcommand{\UrlFont}{\normalfont} % Set URL font to normal
 
 % Language %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+% Code environment option (default: minted on)
+\newif\ifpt@useminted
+\pt@usemintedtrue
 \newcommand{\pt@language}{spanish}
 \DeclareOption{english}{\renewcommand\pt@language{english}}
 \DeclareOption{portuguese}{\renewcommand\pt@language{portuguese}}
 \DeclareOption{french}{\renewcommand\pt@language{french}}
+\DeclareOption{nominted}{\pt@usemintedfalse}
 \ProcessOptions\relax
 \RequirePackage[\pt@language]{babel}
 % Listing caption setup if listings package is loaded
 \newcommand{\pt@captionsetup@listing}[1]{%
     \@ifundefined{lstlisting}{}{%
-        \captionsetup[listing]{#1}%
+        \@ifundefined{captionsetup}{}{\captionsetup[listing]{#1}}%
     }%
 }
 % Language specific commands
@@ -155,7 +170,10 @@
 \RequirePackage{totcount}
 \regtotcounter{table}
 \regtotcounter{figure}
-\regtotcounter{listing}
+% Register listing counter only if provided (by listings)
+\makeatletter
+\@ifundefined{c@listing}{}{\regtotcounter{listing}}
+\makeatother
 \newcommand{\ptlistoftables}{
     \ifnum \totvalue{table}>0
         \listoftables
@@ -167,9 +185,9 @@
     \fi
 }
 \newcommand{\ptlistofcodes}{%
-    \ifnum \totvalue{listing}>0
-        \lstlistoflistings
-    \fi
+    \makeatletter
+    \@ifundefined{lstlistoflistings}{}{\ifnum \totvalue{listing}>0\relax \lstlistoflistings \fi}%
+    \makeatother
 }
 
 % File Tree %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -240,7 +258,7 @@
     \IfStrEq{\ext}{mkv}{\iconbox{file-video}\ #1\@iconfoundtrue}{}%
     % Default
     \if@iconfound\else
-        \IfStrEq{\ext}{}{\iconbox{folder-open}\ #1}{\iconbox{file}}%
+        \IfStrEq{\ext}{}{\iconbox{folder-open}\ #1}{\iconbox{file}\ #1}%
     \fi%
     \endgroup
 }
@@ -347,7 +365,7 @@
         \csname authornamefull##1\endcsname & \csname authordetails##1\endcsname \\%
         \csname authoremailurl##1\endcsname &                                    %
         \int_compare:nNnF{##1}={\value{authorindex}}{                            \\}%
-        }                                                                        \\%
+        }%
     \end{tabular}%
 }
 \ExplSyntaxOff
@@ -427,7 +445,6 @@
 % Tables styling %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \BeforeBeginEnvironment{tblr}{\centering}
-\newcommand{\cellrotated}[1]{\rotatebox{90}{#1\hspace{4pt}}}
 \SetTblrInner{rowsep=0.6pt}
 \SetTblrInner{colsep=3pt}
 \SetTblrInner{width=\columnwidth}
@@ -446,33 +463,69 @@
         ptblue!21
     }
 }
+\NewTableCommand\tablecellleft{
+    \SetCell{
+        halign=l,
+        valign=t
+    }
+}
+\NewTableCommand\tablecellcenter{
+    \SetCell{
+        halign=c,
+        valign=t
+    }
+}
+\NewTableCommand\tablecellright{
+    \SetCell{
+        halign=r,
+        valign=t
+    }
+}
+\NewTableCommand\tablecellbold{
+    \SetCell{
+        font=\bfseries
+    }
+}
+\NewTableCommand\tablecellrotated{
+    \SetCell{
+        rotate=90,
+        halign=c,
+        valign=c
+    }
+}
 
 % Code styling %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \RequirePackage{fancyvrb}
-\RequirePackage{minted}
-\setminted{
-    bgcolor=ptgray!42,
-    fontfamily=tt,
-    fontsize=\small,
-    autogobble=true,
-    linenos=true,
-    tabsize=4,
-    numbersep=5pt,
-    baselinestretch=0.75,
-    showspaces=false,
-    vspace=0.25cm,
-}
-\newenvironment{ptprintcode}[1]{%
-    \VerbatimEnvironment
-    \begin{minted}[
-    style=bw,
-    bgcolor=white,
-    frame=single,
-    ]{#1}%
-}{%
-  \end{minted}%
-}
+\ifpt@useminted
+    \RequirePackage{minted}
+    \setminted{%
+        bgcolor=ptgray!42,%
+        fontfamily=tt,%
+        fontsize=\small,%
+        autogobble=true,%
+        linenos=true,%
+        tabsize=4,%
+        numbersep=5pt,%
+        baselinestretch=0.75,%
+        showspaces=false,%
+        vspace=0.25cm,%
+    }
+    \newenvironment{ptprintcode}[1]{%
+        \VerbatimEnvironment
+        \begin{minted}[%
+            style=bw,%
+            bgcolor=white,%
+            frame=single,%
+        ]{#1}%
+    }{%
+        \end{minted}%
+    }
+\else
+    % Fallback when minted is disabled: simple verbatim block
+    \newenvironment{ptprintcode}[1]{\Verbatim}{\endVerbatim}
+
+\fi
 
 % Watermark %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -525,6 +578,12 @@
     }{
         \def\buildcount{0}
     }
+    % Apply link colors after colors are defined
+    \hypersetup{%
+        colorlinks,%
+        linkcolor=ptlightblue,%
+        urlcolor=ptlightblue%
+    }
     \ifdefined\pt@watermark%
         \DraftwatermarkOptions{stamp=true}
         \setupwatermark{
@@ -541,23 +600,8 @@
             \fi
         }
     \fi
-    \IfFileExists{\buildcountfile}{%
-        \newread\file
-        \openin\file=\buildcountfile
-        \read\file to\buildcount
-        \closein\file
-        \ifx\buildcount\empty
-            \def\buildcount{0}
-        \fi
-    }{
-        \def\buildcount{0}
-    }
     \sloppy
 }
 \AtEndDocument{
-    \newwrite\file
-    \immediate\openout\file=\buildcountfile
-    \edef\next{\number\numexpr\buildcount+1\relax}
-    \immediate\write\file{\next}
-    \immediate\closeout\file
+    \pt@writebuildcount
 }
