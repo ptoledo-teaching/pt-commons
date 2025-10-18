@@ -1,1 +1,8 @@
-/template/*.pdf
+*.aux
+*.log
+*.out
+*.pdf
+*.gz
+*.lof
+*.lot
+*.toc
