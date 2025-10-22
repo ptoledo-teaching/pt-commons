@@ -120,7 +120,7 @@
 \renewcommand{\UrlFont}{\normalfont} % Set URL font to normal
 % Bold external links
 \let\hrefregular\href
-\renewcommand{\href}[2]{\hrefregular{#1}{\textbf{#2}}}
+\renewcommand{\href}[2]{\hrefregular{#1}{\color{ptlightblue}\textbf{#2}}}
 % Bold internal references
 \usepackage{letltxmacro}
 \AtBeginDocument{%
@@ -706,8 +706,10 @@
     }
     % Apply link colors after colors are defined
     \hypersetup{%
+        colorlinks=true,%
         linkcolor=ptlightblue,%
-        urlcolor=ptlightblue%
+        urlcolor=ptlightblue,%
+        citecolor=ptlightblue%
     }
     \ifdefined\pt@watermark%
         \DraftwatermarkOptions{stamp=true}
