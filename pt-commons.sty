@@ -119,6 +119,17 @@
 % Links
 \@ifpackageloaded{hyperref}{}{\RequirePackage[colorlinks]{hyperref}} % Guard if already loaded, e.g., beamer
 \renewcommand{\UrlFont}{\normalfont} % Set URL font to normal
+% Bold external links
+\let\hrefregular\href
+\renewcommand{\href}[2]{\hrefregular{#1}{\textbf{#2}}}
+% Bold internal references
+\usepackage{letltxmacro}
+\AtBeginDocument{%
+    \LetLtxMacro\refregular\ref
+    \renewcommand{\ref}[1]{\textbf{\refregular{#1}}}%
+    \LetLtxMacro\autorefregular\autoref
+    \renewcommand{\autoref}[1]{\textbf{\autorefregular{#1}}}%
+}
 
 % Language %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
