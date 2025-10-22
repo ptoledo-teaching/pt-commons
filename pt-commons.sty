@@ -249,6 +249,37 @@
     {0em}{}[.]
 }
 
+% Itemize and enumerate spacing %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\@ifclassloaded{beamer}{}{%
+    \RequirePackage{enumitem}
+    \setlist[itemize,1]{
+        leftmargin=42pt,
+        labelsep=6pt,
+        topsep=6pt,
+        parsep=0pt,
+        itemsep=1pt
+    }
+    \setlist[itemize,2]{
+        leftmargin=12pt,
+        topsep=0pt,
+        parsep=0pt,
+        itemsep=1pt
+    }
+    \setlist[enumerate,1]{
+        leftmargin=42pt,
+        labelsep=6pt,
+        topsep=6pt,
+        parsep=0pt,
+        itemsep=0pt
+    }
+    \setlist[enumerate,2]{
+        leftmargin=12pt,
+        topsep=0pt,
+        parsep=0pt,
+        itemsep=0pt
+    }
+}
+
 % Tables of contents, figures, tables and listings %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \RequirePackage{totcount}
