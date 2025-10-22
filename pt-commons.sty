@@ -222,6 +222,33 @@
     \rfoot{}
 }
 
+% Sectioning formats %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\@ifclassloaded{beamer}{}{%
+    \RequirePackage{titlesec}
+    \setlength{\parindent}{42pt}
+    \titleformat{\section}
+    {\normalfont\Large\bfseries}
+    {\makebox[42pt][l]{\thesection.}}
+    {0em}{}
+    \titleformat{\subsection}
+    {\normalfont\large\bfseries}
+    {\makebox[42pt][l]{\thesubsection.}}
+    {0em}{}
+    \titleformat{\subsubsection}
+    {\normalfont\normalsize\bfseries}
+    {\makebox[42pt][l]{\thesubsubsection.}}
+    {0em}{}
+    \titleformat{\paragraph}[runin]
+    {\normalfont\normalsize\bfseries}
+    {\theparagraph}
+    {0em}{}[.]
+    \titleformat{\subparagraph}[runin]
+    {\normalfont\normalsize\bfseries}
+    {\thesubparagraph}
+    {0em}{}[.]
+}
+
 % Tables of contents, figures, tables and listings %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \RequirePackage{totcount}
