@@ -31,7 +31,7 @@
 \RequirePackage{float}
 \RequirePackage{fontawesome5}
 \RequirePackage{graphicx}
-\RequirePackage{microtype}
+\RequirePackage[patch=none]{microtype}
 \RequirePackage{newtxsf}
 \RequirePackage{ragged2e}
 \RequirePackage{tabularray}
@@ -196,6 +196,16 @@
 \@ifclassloaded{beamer}{}{%
     \RequirePackage{fancyhdr}
     \pagestyle{empty}
+    % Center footer on the physical page, not only on text width.
+    \newcommand{\pt@setfullpagefancyoffsets}{%
+        \fancyhfoffset[LO]{\dimexpr1in+\oddsidemargin\relax}%
+        \fancyhfoffset[RO]{\dimexpr\paperwidth-\textwidth-1in-\oddsidemargin\relax}%
+        \if@twoside
+            \fancyhfoffset[LE]{\dimexpr1in+\evensidemargin\relax}%
+            \fancyhfoffset[RE]{\dimexpr\paperwidth-\textwidth-1in-\evensidemargin\relax}%
+        \fi
+    }
+    \AtBeginDocument{\pt@setfullpagefancyoffsets}
     \renewcommand{\headrulewidth}{0pt} % Disable header rule
     \lhead{}
     \chead{}
