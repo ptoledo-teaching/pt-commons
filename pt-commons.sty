@@ -302,7 +302,6 @@
 \RequirePackage{totcount}
 \@ifundefined{c@table}{}{\regtotcounter{table}}
 \@ifundefined{c@figure}{}{\regtotcounter{figure}}
-\@ifundefined{c@listing}{}{\regtotcounter{listing}}
 \newcommand{\ptlistoftables}{%
     \@ifundefined{c@table}{}{%
         \ifnum \totvalue{table}>0
@@ -632,6 +631,7 @@
 \RequirePackage{fancyvrb}
 \ifpt@useminted
     \RequirePackage[newfloat]{minted}
+    \@ifundefined{c@listing}{}{\regtotcounter{listing}}
     \setminted{%
         bgcolor=ptgray!42,%
         fontfamily=tt,%
