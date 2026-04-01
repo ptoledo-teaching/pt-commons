@@ -38,9 +38,13 @@
 \RequirePackage{tcolorbox}
 \RequirePackage[absolute,overlay]{textpos}
 \RequirePackage{xstring}
-\@ifclassloaded{beamer}{}{%
+\@ifclassloaded{beamer}{%
+    \RequirePackage{capt-of}%
+    \newcommand{\ptcaption}[2]{\captionof{#1}{#2}}%
+    \newcommand{\ptcaptionsame}[2]{\addtocounter{#1}{-1}\captionof{#1}{#2}}%
+}{%
     \RequirePackage{geometry} % Geometry package conflicts with beamer
-    \RequirePackage[hypcap=false]{caption}% Beamer manages captions itself
+    \RequirePackage[hypcap=false]{caption}%
     \captionsetup{%
         justification=justified,%
         singlelinecheck=true%
@@ -153,7 +157,8 @@
 \addto\captionsspanish{
     \renewcommand{\tablename}{Tabla}
     \renewcommand{\listtablename}{Lista de tablas}
-    \pt@captionsetup@listing{name=Código}
+    \renewcommand{\listingname}{Código}
+    \renewcommand{\listlistingname}{Lista de códigos}
     \floatname{filetree}{Árbol de archivos}
     \providecommand{\pt@labeltoc}{Tabla de contenidos}
     \providecommand{\pt@labelquestions}{¿Preguntas?}
@@ -163,7 +168,8 @@
 \addto\captionsenglish{
     \renewcommand{\tablename}{Table}
     \renewcommand{\listtablename}{Tables}
-    \pt@captionsetup@listing{name=Code}
+    \renewcommand{\listingname}{Code}
+    \renewcommand{\listlistingname}{List of Codes}
     \floatname{filetree}{File Tree}
     \providecommand{\pt@labeltoc}{Table of Contents}
     \providecommand{\pt@labelquestions}{Questions?}
@@ -173,7 +179,8 @@
 \addto\captionsfrench{
     \renewcommand{\tablename}{Tableau}
     \renewcommand{\listtablename}{Liste des tableaux}
-    \pt@captionsetup@listing{name=Code}
+    \renewcommand{\listingname}{Code}
+    \renewcommand{\listlistingname}{Liste des codes}
     \floatname{filetree}{Arbre de fichiers}
     \providecommand{\pt@labeltoc}{Table des matières}
     \providecommand{\pt@labelquestions}{Questions ?}
@@ -183,7 +190,8 @@
 \addto\captionsportuguese{
     \renewcommand{\tablename}{Tabela}
     \renewcommand{\listtablename}{Listas de tabelas}
-    \pt@captionsetup@listing{name=Código}
+    \renewcommand{\listingname}{Código}
+    \renewcommand{\listlistingname}{Listas de códigos}
     \floatname{filetree}{Árvore de arquivos}
     \providecommand{\pt@labeltoc}{Sumário}
     \providecommand{\pt@labelquestions}{Perguntas?}
@@ -310,7 +318,11 @@
     }%
 }
 \newcommand{\ptlistofcodes}{%
-    \@ifundefined{lstlistoflistings}{}{\ifnum \totvalue{listing}>0\relax \lstlistoflistings \fi}%
+    \@ifundefined{listoflistings}{}{%
+        \ifnum \totvalue{listing}>0\relax
+            \listoflistings
+        \fi
+    }%
 }
 
 % File Tree %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -619,7 +631,7 @@
 
 \RequirePackage{fancyvrb}
 \ifpt@useminted
-    \RequirePackage{minted}
+    \RequirePackage[newfloat]{minted}
     \setminted{%
         bgcolor=ptgray!42,%
         fontfamily=tt,%
