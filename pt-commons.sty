@@ -404,9 +404,9 @@
 \newenvironment{ptdirtree}{
     \hspace*{-0.4cm}%
     \begin{minipage}{.875\columnwidth}
-        \vspace{0.25cm}
-        }{
-        \vspace{0.4cm}
+    \vspace{0.25cm}
+}{
+    \vspace{0.4cm}
     \end{minipage}
 }
 
@@ -497,9 +497,9 @@
 \newcommand{\titleauthorstable}{%
     \begin{tabular}{r|l}%
         \int_step_inline:nnn{1}{\value{authorindex}}{%
-        \csname authornamefull##1\endcsname & \csname authordetails##1\endcsname \\%
-        \csname authoremailurl##1\endcsname &                                    %
-        \int_compare:nNnF{##1}={\value{authorindex}}{                            \\}%
+            \csname authornamefull##1\endcsname & \csname authordetails##1\endcsname \\%
+            \csname authoremailurl##1\endcsname &                                    %
+            \int_compare:nNnF{##1}={\value{authorindex}}{                            \\}%
         }%
     \end{tabular}%
 }
@@ -657,7 +657,6 @@
 \else
     % Fallback when minted is disabled: simple verbatim block
     \newenvironment{ptprintcode}[1]{\Verbatim}{\endVerbatim}
-    
 \fi
 
 % Enhanced environments %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -665,13 +664,13 @@
 % Highlight box for important content
 \newenvironment{highlightbox}{%
     \begin{tcolorbox}[
-            colback=ptblue!14,
-            colframe=ptblue,
-            boxrule=0.4pt,
-            arc=3pt,
-            outer arc=3pt
-        ]
-        }{
+        colback=ptblue!14,
+        colframe=ptblue,
+        boxrule=0.4pt,
+        arc=3pt,
+        outer arc=3pt
+    ]
+}{
     \end{tcolorbox}
 }
 
