@@ -74,6 +74,13 @@
         NA%
     \fi%
 }
+\newcommand{\docschool}{%
+    \ifdefined\pt@school%
+        \pt@school%
+    \else%
+        NA%
+    \fi%
+}
 \newcommand{\buildcountfile}{%
     \ifdefined\pt@version%
         \jobname\pt@version.buildcount%
