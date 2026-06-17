@@ -714,7 +714,11 @@
     \SetWatermarkFontSize{\@watermarkfinal}%
     \SetWatermarkAngle{45}%
     \SetWatermarkColor{ptred!21}
-    \SetWatermarkHorCenter{0.4\paperwidth}
+    \@ifclassloaded{beamer}{%
+        \SetWatermarkHorCenter{0.4\paperwidth}%
+    }{%
+        \SetWatermarkHorCenter{0.5\paperwidth}%
+    }%
 }
 \newcommand{\watermark}[1]{\newcommand{\pt@watermark}{#1}}
 
