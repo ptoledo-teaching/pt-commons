@@ -593,9 +593,39 @@
 \SetTblrInner{rowsep=0.6pt}
 \SetTblrInner{colsep=3pt}
 \SetTblrInner{width=\columnwidth}
-\NewColumnType{L}[1]{Q[l,t,wd=#1]}
-\NewColumnType{C}[1]{Q[c,t,wd=#1]}
-\NewColumnType{R}[1]{Q[r,t,wd=#1]}
+\ExplSyntaxOn
+\cs_new_protected:Npn \pt_tblr_new_auto_width_column_type:nn #1 #2
+{
+    \exp_args:Nc \NewDocumentCommand { tblr_Column_type_ #1 } { g }
+    {
+        \bool_gset_false:N \g__tblr_colrow_spec_expand_stop_bool
+        \IfNoValueTF {##1}
+        { \tl_gput_right:Nn \g__tblr_expanded_colrow_spec_tl { Q[#2,t,co=1] } }
+        { \tl_gput_right:Nn \g__tblr_expanded_colrow_spec_tl { Q[#2,t,wd=##1] } }
+        \__tblr_expand_colrow_spec_next:N
+    }
+    \str_gput_right:Nn \gTblrUsedColumnTypeStr {#1}
+}
+\pt_tblr_new_auto_width_column_type:nn { L } { l }
+\pt_tblr_new_auto_width_column_type:nn { C } { c }
+\pt_tblr_new_auto_width_column_type:nn { R } { r }
+\exp_args:Nc \RenewDocumentCommand { tblr_Column_type_ X } { o g }
+{
+    \bool_gset_false:N \g__tblr_colrow_spec_expand_stop_bool
+    \IfNoValueTF {#2}
+    {
+        \IfNoValueTF {#1}
+        { \tl_gput_right:Nn \g__tblr_expanded_colrow_spec_tl { Q[j,t,co=1] } }
+        { \tl_gput_right:Nn \g__tblr_expanded_colrow_spec_tl { Q[j,t,co=1,#1] } }
+    }
+    {
+        \IfNoValueTF {#1}
+        { \tl_gput_right:Nn \g__tblr_expanded_colrow_spec_tl { Q[j,t,wd=#2] } }
+        { \tl_gput_right:Nn \g__tblr_expanded_colrow_spec_tl { Q[j,t,#1,wd=#2] } }
+    }
+    \__tblr_expand_colrow_spec_next:N
+}
+\ExplSyntaxOff
 \NewTableCommand\tableheader{
     \SetRow{
         ptblue!42,

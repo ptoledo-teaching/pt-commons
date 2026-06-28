@@ -186,6 +186,10 @@ Regular & \tablecellbold Bold & \tablecellright Right \\
 ### Column Types
 
 ```latex
+L         % Left-aligned with automatic width
+C         % Center-aligned with automatic width
+R         % Right-aligned with automatic width
+X         % Justified with automatic width
 L{width}  % Left-aligned with specific width
 C{width}  % Center-aligned with specific width
 R{width}  % Right-aligned with specific width
