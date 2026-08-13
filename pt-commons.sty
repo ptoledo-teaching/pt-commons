@@ -246,6 +246,16 @@
     \rfoot{}
 }
 
+% Footnotes %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\ptfootnoterogue}[1]{%
+    \begingroup
+    \renewcommand\thefootnote{}
+    \footnotetext{#1}
+    % \addtocounter{footnote}{-1}
+    \endgroup
+}
+
 % Sectioning formats %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \@ifclassloaded{beamer}{}{%
