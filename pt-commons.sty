@@ -169,6 +169,7 @@
     \floatname{filetree}{Árbol de archivos}
     \providecommand{\pt@labeltoc}{Tabla de contenidos}
     \providecommand{\pt@labelquestions}{¿Preguntas?}
+    \providecommand{\pt@labelinstruction}{Instrucción:}
     \providecommand{\pt@labelbackgroundsource}{Fotografía de fondo}
     \providecommand{\pt@labeltemplatecredit}{Plantilla del tema}
 }
@@ -180,6 +181,7 @@
     \floatname{filetree}{File Tree}
     \providecommand{\pt@labeltoc}{Table of Contents}
     \providecommand{\pt@labelquestions}{Questions?}
+    \providecommand{\pt@labelinstruction}{Instruction:}
     \providecommand{\pt@labelbackgroundsource}{Background source}
     \providecommand{\pt@labeltemplatecredit}{Theme template}
 }
@@ -191,6 +193,7 @@
     \floatname{filetree}{Arbre de fichiers}
     \providecommand{\pt@labeltoc}{Table des matières}
     \providecommand{\pt@labelquestions}{Questions ?}
+    \providecommand{\pt@labelinstruction}{Instruction :}
     \providecommand{\pt@labelbackgroundsource}{Source de l'image de fond}
     \providecommand{\pt@labeltemplatecredit}{Modèle du thème}
 }
@@ -202,6 +205,7 @@
     \floatname{filetree}{Árvore de arquivos}
     \providecommand{\pt@labeltoc}{Sumário}
     \providecommand{\pt@labelquestions}{Perguntas?}
+    \providecommand{\pt@labelinstruction}{Instrução:}
     \providecommand{\pt@labelbackgroundsource}{Fonte da imagem de fundo}
     \providecommand{\pt@labeltemplatecredit}{Modelo do tema}
 }
@@ -576,6 +580,10 @@
 
 % Text styling %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+% Instructions
+\newcommand{\ptinstruction}[1]{%
+    \textcolor{ptred}{\textbf{\pt@labelinstruction} #1}%
+}
 % Itemize bullets
 \def\labelitemi{$\bullet$}
 \def\labelitemii{$\bullet$}

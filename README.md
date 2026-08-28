@@ -67,6 +67,7 @@ Your content here...
 ```
 
 **Note:** Minted is enabled by default but automatically falls back to verbatim if:
+
 - `minted.sty` is not found
 - Shell escape is not enabled (`-shell-escape` flag)
 
@@ -140,19 +141,19 @@ Add multiple authors with full details:
 
 Pre-defined PT color palette:
 
-| Color | Hex Code |
-|-------|----------|
-| `ptred` | `#D60019` |
-| `ptdarkred` | `#68000C` |
-| `ptlightblue` | `#499BDA` |
-| `ptblue` | `#004B85` |
-| `ptdarkblue` | `#002038` |
-| `ptgreen` | `#008452` |
-| `ptdarkgreen` | `#003823` |
-| `ptyellow` | `#F7AE00` |
+| Color          | Hex Code  |
+| -------------- | --------- |
+| `ptred`        | `#D60019` |
+| `ptdarkred`    | `#68000C` |
+| `ptlightblue`  | `#499BDA` |
+| `ptblue`       | `#004B85` |
+| `ptdarkblue`   | `#002038` |
+| `ptgreen`      | `#008452` |
+| `ptdarkgreen`  | `#003823` |
+| `ptyellow`     | `#F7AE00` |
 | `ptdarkyellow` | `#896000` |
-| `ptgray` | `#E0E0E0` |
-| `ptdarkgray` | `#949494` |
+| `ptgray`       | `#E0E0E0` |
+| `ptdarkgray`   | `#949494` |
 
 ```latex
 \textcolor{ptblue}{Blue text}
@@ -217,6 +218,7 @@ Create visual directory structures with icons:
 ```
 
 Automatically recognizes 50+ file extensions with appropriate FontAwesome icons:
+
 - **Code**: `.py`, `.js`, `.cpp`, `.java`, `.tex`, etc.
 - **Documents**: `.pdf`, `.doc`, `.docx`, `.xls`, `.ppt`
 - **Archives**: `.zip`, `.tar`, `.gz`, `.7z`
@@ -232,11 +234,13 @@ def hello_world():
 ```
 
 The package automatically:
+
 1. Tries to use `minted` if available and shell-escape is enabled
 2. Falls back to `verbatim` with a warning if not
 3. Applies syntax highlighting (minted) or plain formatting (verbatim)
 
 To compile with minted support:
+
 ```bash
 pdflatex -shell-escape document.tex
 ```
@@ -284,6 +288,7 @@ Add watermarks with version/build information:
 ```
 
 The watermark:
+
 - Automatically scales to paper size
 - Positioned at 45° angle
 - Uses `ptred` color at 21% opacity
@@ -292,9 +297,10 @@ The watermark:
 ## Utility Commands
 
 ```latex
-\inlinecode{code}        % Inline code formatting
-\todayymd                % Current date as YYYY/MM/DD
-\twodigits{5}            % Formats number as "05"
+\inlinecode{code}                   % Inline code formatting
+\ptinstruction{Review the results.} % Highlighted instruction
+\todayymd                           % Current date as YYYY/MM/DD
+\twodigits{5}                       % Formats number as "05"
 ```
 
 ### Caption Commands (non-beamer only)
@@ -307,6 +313,7 @@ The watermark:
 ## Beamer Compatibility
 
 The package automatically detects when used with beamer and:
+
 - Skips geometry package (conflicts with beamer)
 - Skips caption customization (beamer handles it)
 - Preserves all other functionality
