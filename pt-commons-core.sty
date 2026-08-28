@@ -1,0 +1,410 @@
+%%
+%% pt-commons-core.sty
+%% Core commands and metadata for the PT document class family
+%%
+%% Author: Pedro Toledo Correa
+%% Repo: https://github.com/ptoledo-teaching/pt-commons
+%% License: LaTeX Project Public License 1.3c or later
+%% Created: 2026-08-28
+%% Updated: 2026-08-28
+%% Version: v0.2
+%%
+%% This work may be distributed and/or modified under the conditions of the
+%% LaTeX Project Public License, version 1.3c or later.
+%%
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{pt-commons-core}[2026/08/28 v0.2 PT Commons Core]
+\makeatletter
+
+% Shared dependencies %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Some PT classes use these packages transitively. Keep them in the facade's
+% mandatory core until the classes declare their own dependencies.
+\RequirePackage{adjustbox}
+\RequirePackage{etoolbox}
+\RequirePackage{expl3}
+\RequirePackage{float}
+\RequirePackage{fontawesome5}
+\RequirePackage{graphicx}
+\RequirePackage{letltxmacro}
+\@ifpackageloaded{microtype}{}{\RequirePackage[patch=none]{microtype}}
+\RequirePackage{newtxsf}
+\RequirePackage{ragged2e}
+\@ifpackageloaded{textpos}{}{\RequirePackage[absolute,overlay]{textpos}}
+\RequirePackage{xcolor}
+\RequirePackage{xstring}
+
+\@ifclassloaded{beamer}{%
+    \RequirePackage{capt-of}%
+}{%
+    \RequirePackage{geometry} % Geometry conflicts with beamer.
+    \@ifpackageloaded{caption}{}{\RequirePackage[hypcap=false]{caption}}%
+    \captionsetup{%
+        justification=justified,%
+        singlelinecheck=true%
+    }%
+}%
+
+% Caption helpers are available with every supported class.
+\newcommand{\ptcaption}[2]{\captionof{#1}{#2}}
+\newcounter{ptcontinuedcaption}
+\newcommand{\ptcaptionsame}[2]{%
+    \@ifundefined{c@#1}{%
+        \PackageError{pt-commons}{Unknown caption type `#1'}%
+            {Define the `#1' counter before using \string\ptcaptionsame.}%
+    }{%
+        \ifnum\value{#1}>0
+            \stepcounter{ptcontinuedcaption}%
+            \begingroup
+            % Reuse the printed counter while giving Hyperref a unique target.
+            \@ifundefined{theH#1}{}{%
+                \edef\pt@continued@anchor{%
+                    \csname theH#1\endcsname.ptc\arabic{ptcontinuedcaption}%
+                }%
+                \expandafter\edef\csname theH#1\endcsname{\pt@continued@anchor}%
+            }%
+            \addtocounter{#1}{-1}%
+            \captionof{#1}{#2}%
+            \endgroup
+        \else
+            \PackageWarningNoLine{pt-commons}{%
+                No previous `#1' caption; creating the first caption%
+            }%
+            \captionof{#1}{#2}%
+        \fi
+    }%
+}
+
+% Utility commands %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\inlinecode}[1]{{\ttfamily\bfseries #1}}
+\newcommand{\twodigits}[1]{% Format a numeric expression using at least two digits.
+    \ifnum\numexpr#1\relax<10 %
+        0%
+    \fi%
+    \number\numexpr#1\relax%
+}
+\newcommand{\todayymd}{\the\year/\twodigits\month/\twodigits\day}
+
+% Document metadata %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Metadata setters remain reusable so callers can override an earlier value.
+\newcommand{\version}[1]{\gdef\pt@version{#1}}
+\newcommand{\build}[1]{\gdef\pt@build{#1}}
+\newcommand{\docversion}{%
+    \ifdefined\pt@version%
+        \ifdefempty{\pt@version}{NA}{v\pt@version}%
+    \else%
+        NA%
+    \fi%
+}
+\newcommand{\docschool}{%
+    \ifdefined\pt@school%
+        \ifdefempty{\pt@school}{NA}{\pt@school}%
+    \else%
+        NA%
+    \fi%
+}
+
+% Preserve the native title/date behavior as well as the PT metadata used by
+% the document classes. Optional short forms are forwarded when the host class
+% supports them (for example Beamer and AMS classes).
+\LetLtxMacro\pt@original@title\title
+\LetLtxMacro\pt@original@date\date
+\newcommand{\pt@title@regular}[1]{%
+    \pt@original@title{#1}%
+    \gdef\pt@title{#1}%
+}
+\long\def\pt@title@optional[#1]#2{%
+    \pt@original@title[#1]{#2}%
+    \gdef\pt@title{#2}%
+}
+\newcommand{\pt@date@regular}[1]{%
+    \pt@original@date{#1}%
+    \gdef\pt@date{#1}%
+}
+\long\def\pt@date@optional[#1]#2{%
+    \pt@original@date[#1]{#2}%
+    \gdef\pt@date{#2}%
+}
+\renewrobustcmd{\title}{\@ifnextchar[{\pt@title@optional}{\pt@title@regular}}
+\renewrobustcmd{\date}{\@ifnextchar[{\pt@date@optional}{\pt@date@regular}}
+
+% Document title
+\newcommand{\titlesub}[1]{\gdef\pt@titlesub{#1}}
+\newcommand{\titlesubsub}[1]{\gdef\pt@titlesubsub{#1}}
+% Class information
+\newcommand{\classcode}[1]{\gdef\pt@classcode{#1}}
+\newcommand{\classsemester}[1]{\gdef\pt@classsemester{#1}}
+\newcommand{\classname}[1]{\gdef\pt@classname{#1}}
+% Institution information
+\newcommand{\workgroup}[1]{\gdef\pt@workgroup{#1}}
+\newcommand{\department}[1]{\gdef\pt@department{#1}}
+\newcommand{\school}[1]{\gdef\pt@school{#1}}
+\newcommand{\university}[1]{\gdef\pt@university{#1}}
+% Corporate information
+\newcommand{\corporation}[1]{\gdef\pt@corporation{#1}}
+\newcommand{\corporationdepartment}[1]{\gdef\pt@corporationdepartment{#1}}
+
+% Fonts and encoding %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\RequirePackage{iftex}
+\ifPDFTeX
+    \RequirePackage[utf8]{inputenc}
+    \RequirePackage[T1]{fontenc}
+\fi
+\@ifpackageloaded{FiraSans}{}{%
+    \RequirePackage[sfdefault,tabular,scaled=.85]{FiraSans}%
+}
+\RequirePackage{fix-cm}
+\ifPDFTeX
+    \@ifpackageloaded{beramono}{}{\RequirePackage[scaled=0.8]{beramono}}
+\else
+    % Bera Mono has no TU encoding. Fira Mono provides native OpenType fonts
+    % for XeLaTeX and LuaLaTeX and avoids an implicit proportional fallback.
+    \@ifpackageloaded{FiraMono}{}{\RequirePackage[scaled=0.8]{FiraMono}}
+\fi
+
+% Colors %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\definecolor{ptred}{HTML}{D60019}
+\definecolor{ptredlight}{HTML}{FF4962}
+\definecolor{ptdarkred}{HTML}{68000C}
+\definecolor{ptlightblue}{HTML}{499BDA}
+\definecolor{ptblue}{HTML}{004B85}
+\definecolor{ptdarkblue}{HTML}{002038}
+\definecolor{ptgreen}{HTML}{008452}
+\definecolor{ptgreenlight}{HTML}{49DA9B}
+\definecolor{ptdarkgreen}{HTML}{003823}
+\definecolor{ptyellow}{HTML}{F7AE00}
+\definecolor{ptyellowlight}{HTML}{FFD549}
+\definecolor{ptdarkyellow}{HTML}{896000}
+\definecolor{ptgray}{HTML}{E0E0E0}
+\definecolor{ptdarkgray}{HTML}{949494}
+
+% Links %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\@ifpackageloaded{hyperref}{}{\RequirePackage[colorlinks]{hyperref}}
+\renewcommand{\UrlFont}{\normalfont}
+\LetLtxMacro\hrefregular\href
+\newcommand{\pt@href@regular}[2]{%
+    \hrefregular{#1}{\color{ptlightblue}\textbf{#2}}%
+}
+\def\pt@href@optional[#1]#2#3{%
+    \hrefregular[#1]{#2}{\color{ptlightblue}\textbf{#3}}%
+}
+\renewrobustcmd{\href}{\@ifnextchar[{\pt@href@optional}{\pt@href@regular}}
+\newcommand{\pt@ref@regular}[1]{\textbf{\refregular{#1}}}
+\newcommand{\pt@ref@star}[1]{\textbf{\refregular*{#1}}}
+\newcommand{\pt@autoref@regular}[1]{\textbf{\autorefregular{#1}}}
+\newcommand{\pt@autoref@star}[1]{\textbf{\autorefregular*{#1}}}
+\AtBeginDocument{%
+    \LetLtxMacro\refregular\ref
+    \renewrobustcmd{\ref}{\@ifstar\pt@ref@star\pt@ref@regular}%
+    \LetLtxMacro\autorefregular\autoref
+    \renewrobustcmd{\autoref}{\@ifstar\pt@autoref@star\pt@autoref@regular}%
+}
+
+% Language %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Avoid an option clash when the host document loaded Babel first. If the
+% requested language is not available yet, use Babel's public locale loader.
+\@ifpackageloaded{babel}{%
+    \@ifundefined{captions\pt@language}{%
+        \@ifundefined{babelprovide}{%
+            \PackageError{pt-commons}{Language `\pt@language' is not loaded}%
+                {Load Babel with `\pt@language' before PT Commons.}%
+        }{%
+            \babelprovide[import]{\pt@language}%
+        }%
+    }{}%
+    \AtBeginDocument{\selectlanguage{\pt@language}}%
+}{%
+    \RequirePackage[\pt@language]{babel}%
+}
+
+% Define internal labels before Babel's caption hooks so language switching can
+% renew them rather than preserving the first language that happened to run.
+\providecommand{\pt@labeltoc}{}
+\providecommand{\pt@labelquestions}{}
+\providecommand{\pt@labelinstruction}{}
+\providecommand{\pt@labelbackgroundsource}{}
+\providecommand{\pt@labeltemplatecredit}{}
+
+\addto\captionsspanish{%
+    \renewcommand{\pt@labeltoc}{Tabla de contenidos}%
+    \renewcommand{\pt@labelquestions}{¿Preguntas?}%
+    \renewcommand{\pt@labelinstruction}{Instrucción:}%
+    \renewcommand{\pt@labelbackgroundsource}{Fotografía de fondo}%
+    \renewcommand{\pt@labeltemplatecredit}{Plantilla del tema}%
+}
+\addto\captionsenglish{%
+    \renewcommand{\pt@labeltoc}{Table of Contents}%
+    \renewcommand{\pt@labelquestions}{Questions?}%
+    \renewcommand{\pt@labelinstruction}{Instruction:}%
+    \renewcommand{\pt@labelbackgroundsource}{Background source}%
+    \renewcommand{\pt@labeltemplatecredit}{Theme template}%
+}
+\addto\captionsfrench{%
+    \renewcommand{\pt@labeltoc}{Table des matières}%
+    \renewcommand{\pt@labelquestions}{Questions ?}%
+    \renewcommand{\pt@labelinstruction}{Instruction :}%
+    \renewcommand{\pt@labelbackgroundsource}{Source de l'image de fond}%
+    \renewcommand{\pt@labeltemplatecredit}{Modèle du thème}%
+}
+\addto\captionsportuguese{%
+    \renewcommand{\pt@labeltoc}{Sumário}%
+    \renewcommand{\pt@labelquestions}{Perguntas?}%
+    \renewcommand{\pt@labelinstruction}{Instrução:}%
+    \renewcommand{\pt@labelbackgroundsource}{Fonte da imagem de fundo}%
+    \renewcommand{\pt@labeltemplatecredit}{Modelo do tema}%
+}
+
+% Authors %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newlength{\lengthname}
+\newlength{\lengthmail}
+\newlength{\minipagelength}
+\newcounter{authorindex}
+\setcounter{authorindex}{0}
+
+\newcommand\authornameentry[2]{#1, #2}
+\newcommand\authoremailentry[1]{%
+    \ifstrempty{#1}{}{\href{mailto:#1}{\nolinkurl{#1}}}%
+}
+\newcommand{\pt@author@tableemailrow}[1]{%
+    \\% Complete the name/details row.
+    \csname authoremailurl#1\endcsname &%
+}
+\newcommand{\pt@author@tablerow}[1]{%
+    \csname authornamefull#1\endcsname
+        & \csname authordetails#1\endcsname
+    \csname authortableemailrow#1\endcsname
+}
+
+\newcommand\addauthor[4]{%
+    \gdef\pt@authors{true}%
+    \stepcounter{authorindex}%
+    \expandafter\gdef\csname authornamelast\theauthorindex\endcsname{#2}%
+    \expandafter\gdef\csname authornamefull\theauthorindex\endcsname{\authornameentry{#2}{#1}}%
+    \expandafter\gdef\csname authoremailplain\theauthorindex\endcsname{#3}%
+    \expandafter\gdef\csname authoremailurl\theauthorindex\endcsname{\authoremailentry{#3}}%
+    \expandafter\gdef\csname authordetails\theauthorindex\endcsname{#4}%
+    \ifstrempty{#3}{%
+        \expandafter\gdef\csname authortableemailrow\theauthorindex\endcsname{}%
+    }{%
+        \expandafter\xdef\csname authortableemailrow\theauthorindex\endcsname{%
+            \noexpand\pt@author@tableemailrow{\theauthorindex}%
+        }%
+    }%
+    \settowidth{\lengthname}{#1, #2\textsuperscript{\alph{authorindex}}}%
+    \ifstrempty{#3}{%
+        \setlength{\lengthmail}{0pt}%
+    }{%
+        \settowidth{\lengthmail}{\nolinkurl{#3}}%
+    }%
+    \ifdim\lengthname>\minipagelength
+        \setlength{\minipagelength}{\lengthname}%
+    \fi
+    \ifdim\lengthmail>\minipagelength
+        \setlength{\minipagelength}{\lengthmail}%
+    \fi
+}
+
+\newcommand{\titleauthorsnames}[1]{%
+    \begingroup
+    \count1=1%
+    \loop
+        \ifnum\count1<\numexpr\value{authorindex}+1\relax
+        \ifnum\count1>1 #1\fi
+        \csname authornamefull\the\count1\endcsname
+        \advance\count1 by 1%
+    \repeat
+    \endgroup
+}
+
+\newcommand{\titleauthorsfooter}[1]{%
+    \begingroup
+    \count1=1%
+    \loop
+        \ifnum\count1<\numexpr\value{authorindex}+1\relax
+        \ifnum\count1>1 #1\fi
+        \csname authornamefull\the\count1\endcsname
+        \expandafter\ifx\csname authoremailplain\the\count1\endcsname\@empty
+        \else
+            \ (\csname authoremailurl\the\count1\endcsname)%
+        \fi
+        \advance\count1 by 1%
+    \repeat
+    \endgroup
+}
+
+\newcommand{\titleauthorsboxes}{%
+    \begingroup
+    \addtolength{\minipagelength}{3pt}%
+    \count1=1%
+    \loop
+        \ifnum\count1<\numexpr\value{authorindex}+1\relax
+        \begin{minipage}{\minipagelength}
+            \centering
+            \csname authornamefull\the\count1\endcsname
+            \if\relax\csname authordetails\the\count1\endcsname\relax
+            \else
+                \footnotemark[\the\count1]%
+            \fi
+            \expandafter\ifx\csname authoremailplain\the\count1\endcsname\@empty
+            \else
+                \\\csname authoremailurl\the\count1\endcsname
+            \fi
+        \end{minipage}%
+        \advance\count1 by 1%
+    \repeat
+    \endgroup
+}
+
+\newcommand{\titleauthorsfootnotes}{%
+    \begingroup
+    \count1=1%
+    \loop
+        \ifnum\count1<\numexpr\value{authorindex}+1\relax
+        \if\relax\csname authordetails\the\count1\endcsname\relax
+        \else
+            \footnotetext[\the\count1]{\csname authordetails\the\count1\endcsname}%
+        \fi
+        \advance\count1 by 1%
+    \repeat
+    \endgroup
+}
+
+\ExplSyntaxOn
+\newcommand{\titleauthorstable}{%
+    \begingroup
+    \ifnum\value{authorindex}>0
+        \begin{tabular}{r|l}
+        \int_step_inline:nn { \value{authorindex} }
+            { \pt@author@tablerow{##1} \\ }
+        \end{tabular}%
+    \fi
+    \endgroup
+}
+\ExplSyntaxOff
+
+% Shared visual metadata %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\background}[1]{\gdef\pt@background{#1}}
+\newcommand{\backgroundcredit}[1]{\gdef\pt@backgroundcredit{#1}}
+\def\pt@logo{}
+\ifdefined\logo
+    \LetLtxMacro\pt@original@logo\logo
+    \renewrobustcmd{\logo}[1]{%
+        \pt@original@logo{#1}%
+        \gdef\pt@logo{#1}%
+    }%
+\else
+    \newcommand{\logo}[1]{\gdef\pt@logo{#1}}%
+\fi
+\newcommand{\watermark}[1]{\gdef\pt@watermark{#1}}
+
+\makeatother
+\endinput

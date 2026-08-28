@@ -1,33 +1,51 @@
 # PT Commons Package
 
-**Version:** 0.1  
-**Date:** 2025/10/18  
-**Author:** Pedro Toledo Correa  
-**License:** LaTeX Project Public License 1.3c or later  
+**Version:** 0.2<br>
+**Date:** 2026/08/28<br>
+**Author:** Pedro Toledo Correa<br>
+**License:** LaTeX Project Public License 1.3c or later<br>
 **Repository:** [GitHub - pt-latex/pt-commons](https://github.com/ptoledo-teaching/pt-commons)
 
-A comprehensive LaTeX package providing common functionality, styling, and utilities for academic and professional documents. This package serves as a foundation for the PT document class family (pt-article, pt-book, pt-report, pt-slides, pt-letter).
+PT Commons provides the shared commands, styles, and runtime helpers used by the
+PT document class family (`pt-article`, `pt-report`, `pt-slides`, and
+`pt-letter`). It can also be loaded directly from a standard LaTeX class.
 
 ## Features
 
-- **Multi-language Support**: Spanish (default), English, Portuguese, French
-- **Automatic Font Configuration**: Fira Sans and Inconsolata with proper scaling
-- **Document Metadata Management**: Version control, build counting, author handling
-- **Enhanced Tables**: Tabularray-based styling with predefined commands
-- **File Tree Visualization**: Icon-based directory structures with FontAwesome
-- **Code Formatting**: Automatic minted/verbatim fallback with shell-escape detection
-- **Customizable Colors**: PT color palette for consistent branding
-- **Watermark Support**: Automatic version/build watermarks
-- **Smart List of Contents**: Only displays lists when content exists
+- Multi-language support: Spanish (default), English, Portuguese, and French
+- Reusable document, institution, class, and corporate metadata
+- Multiple-author formatting with optional email and affiliation information
+- Shared PT colors, typography, headers, footers, lists, and section styles
+- Tabularray table helpers and TikZ/PGFPlots support
+- File-tree floats with Font Awesome icons
+- Minted code blocks with an explicit verbatim fallback
+- Optional document watermarks and manual or automatic build information
+- Conditional lists of figures, tables, and code listings
+
+## Architecture
+
+`pt-commons.sty` is the public facade. Its implementation is split into four
+internal modules:
+
+| File | Responsibility |
+| --- | --- |
+| `pt-commons.sty` | Public package, options, and module loading order |
+| `pt-commons-core.sty` | Dependencies, metadata, languages, links, authors, and colors |
+| `pt-commons-layout.sty` | Headers, footers, sections, lists, and text styles |
+| `pt-commons-content.sty` | Tables, figures, file trees, plots, and code blocks |
+| `pt-commons-runtime.sty` | Build metadata, watermarks, and document hooks |
+
+The four implementation modules are internal: documents should continue to
+load only `pt-commons`.
 
 ## Installation
 
-Place `pt-commons.sty` in your LaTeX project directory or install it in your local texmf tree:
+All five `.sty` files must remain together. Place them in the document directory
+or install them in a local TeX tree:
 
 ```bash
-# Local installation
 mkdir -p ~/texmf/tex/latex/pt-commons
-cp pt-commons.sty ~/texmf/tex/latex/pt-commons/
+cp pt-commons*.sty ~/texmf/tex/latex/pt-commons/
 texhash ~/texmf
 ```
 
@@ -44,61 +62,101 @@ texhash ~/texmf
 \begin{document}
 \maketitle
 
-Your content here...
+Your content here.
 
 \end{document}
 ```
 
+The package preserves the standard behavior of `\title` and `\date`, including
+Beamer's optional short forms, while also making their values available to the
+PT classes.
+
 ## Package Options
 
-### Language Options
+### Language
 
 ```latex
-\usepackage[english]{pt-commons}    % English
-\usepackage[spanish]{pt-commons}    % Spanish (default)
-\usepackage[portuguese]{pt-commons} % Portuguese
-\usepackage[french]{pt-commons}     % French
+\usepackage[english]{pt-commons}
+\usepackage[spanish]{pt-commons}    % Default
+\usepackage[portuguese]{pt-commons}
+\usepackage[french]{pt-commons}
 ```
 
-### Code Environment Options
+The package also follows later `\selectlanguage{...}` changes.
+
+### Code Environment
+
+Minted is enabled by default:
 
 ```latex
-\usepackage[nominted]{pt-commons}   % Disable minted, use verbatim
+\begin{ptprintcode}{python}
+def hello_world():
+    print("Hello, World!")
+\end{ptprintcode}
 ```
 
-**Note:** Minted is enabled by default but automatically falls back to verbatim if:
-
-- `minted.sty` is not found
-- Shell escape is not enabled (`-shell-escape` flag)
-
-## Document Metadata Commands
-
-### Version Control
+Use the explicit fallback when Minted is unavailable or external command
+execution is not desired:
 
 ```latex
-\version{1.0}              % Set document version
-\build{auto}               % Auto-increment build number
-\build{42}                 % Manual build number
-\docversion                % Displays: v1.0
+\usepackage[nominted]{pt-commons}
 ```
 
-Build numbers are automatically tracked in `.buildcount` files and increment on each compilation.
+If `minted.sty` is not installed, PT Commons automatically uses the verbatim
+fallback and issues a warning. Depending on the installed Minted version and
+TeX configuration, syntax highlighting may require shell escape:
 
-### Title Information
+```bash
+pdflatex -shell-escape document.tex
+```
+
+The fallback `ptprintcode` accepts the same language argument but renders plain
+verbatim text.
+
+## Document Metadata
+
+Metadata setters may be called more than once; the last value is used.
+
+### Version and Build
+
+```latex
+\version{1.0}
+\build{auto}   % Persistent automatic build number
+\build{42}     % Fixed build number
+\docversion    % Prints v1.0, or NA if no version was set
+```
+
+Automatic mode stores its state in a job- and version-specific `*.buildcount`
+file. No build-count file is read or written when `\build` is omitted or a
+manual build value is used. The automatic value advances once per TeX engine
+pass.
+
+Because `*.buildcount` is both read and rewritten, Latexmk must ignore changes
+to that file when deciding whether another pass is necessary. Add this rule to
+the project's `latexmkrc`:
+
+```perl
+$hash_calc_ignore_pattern{'buildcount'} = '^';
+```
+
+Without the rule, `\build{auto}` can keep Latexmk running until its maximum
+number of passes. A fixed `\build{...}` value needs no special configuration.
+
+### Title
 
 ```latex
 \title{Main Title}
 \titlesub{Subtitle}
 \titlesubsub{Sub-subtitle}
-\date{2025-10-18}
+\date{2026-08-28}
 ```
 
-### Academic/Class Information
+### Academic and Class Information
 
 ```latex
 \classcode{CS-101}
 \classname{Introduction to Computer Science}
-\classsemester{Fall 2025}
+\classsemester{Fall 2026}
 ```
 
 ### Institution Information
@@ -113,47 +171,48 @@ Build numbers are automatically tracked in `.buildcount` files and increment on 
 ### Corporate Information
 
 ```latex
-\corporationname{Company Name}
+\corporation{Company Name}
 \corporationdepartment{Department Name}
 ```
 
 ## Author Management
 
-Add multiple authors with full details:
+Add authors as first name, last name, email, and affiliation/details:
 
 ```latex
-\addauthor{FirstName}{LastName}{email@domain.com}{Affiliation/Details}
-\addauthor{Jane}{Doe}{jane@university.edu}{Department of CS, University}
-\addauthor{John}{Smith}{john@company.com}{Senior Engineer, Tech Corp}
+\addauthor{Jane}{Doe}{jane_one@university.edu}{Department of CS}
+\addauthor{John}{Smith}{}{Senior Engineer}
 ```
 
-### Author Display Commands
+Emails and details may be empty. The author renderers do not display empty
+parentheses or footnotes.
 
 ```latex
-\titleauthorsnames{, }        % Names separated by comma-space
-\titleauthorsfooter{; }       % Names with emails in footer
-\titleauthorsboxes            % Authors in centered minipages
-\titleauthorsfootnotes        % Affiliations as footnotes
-\titleauthorstable            % Authors in table format
+\titleauthorsnames{, }   % Names separated by comma-space
+\titleauthorsfooter{; }  % Names and non-empty emails
+\titleauthorsboxes       % Centered author minipages
+\titleauthorsfootnotes   % Affiliations as footnotes
+\titleauthorstable       % Authors in tabular form
 ```
 
 ## Colors
 
-Pre-defined PT color palette:
-
-| Color          | Hex Code  |
-| -------------- | --------- |
-| `ptred`        | `#D60019` |
-| `ptdarkred`    | `#68000C` |
-| `ptlightblue`  | `#499BDA` |
-| `ptblue`       | `#004B85` |
-| `ptdarkblue`   | `#002038` |
-| `ptgreen`      | `#008452` |
-| `ptdarkgreen`  | `#003823` |
-| `ptyellow`     | `#F7AE00` |
+| Color | Hex |
+| --- | --- |
+| `ptred` | `#D60019` |
+| `ptredlight` | `#FF4962` |
+| `ptdarkred` | `#68000C` |
+| `ptlightblue` | `#499BDA` |
+| `ptblue` | `#004B85` |
+| `ptdarkblue` | `#002038` |
+| `ptgreen` | `#008452` |
+| `ptgreenlight` | `#49DA9B` |
+| `ptdarkgreen` | `#003823` |
+| `ptyellow` | `#F7AE00` |
+| `ptyellowlight` | `#FFD549` |
 | `ptdarkyellow` | `#896000` |
-| `ptgray`       | `#E0E0E0` |
-| `ptdarkgray`   | `#949494` |
+| `ptgray` | `#E0E0E0` |
+| `ptdarkgray` | `#949494` |
 
 ```latex
 \textcolor{ptblue}{Blue text}
@@ -161,8 +220,6 @@ Pre-defined PT color palette:
 ```
 
 ## Tables
-
-Enhanced table commands using tabularray:
 
 ```latex
 \begin{tblr}{colspec={lcc}}
@@ -174,32 +231,12 @@ Regular & \tablecellbold Bold & \tablecellright Right \\
 \end{tblr}
 ```
 
-### Table Commands
-
-- `\tableheader` - Blue header row with bold text
-- `\tablesubheader` - Light blue subheader row
-- `\tablecellleft` - Left-aligned cell
-- `\tablecellcenter` - Center-aligned cell
-- `\tablecellright` - Right-aligned cell
-- `\tablecellbold` - Bold cell content
-- `\tablecellrotated` - Rotated 90° cell content
-
-### Column Types
-
-```latex
-L         % Left-aligned with automatic width
-C         % Center-aligned with automatic width
-R         % Right-aligned with automatic width
-X         % Justified with automatic width
-L{width}  % Left-aligned with specific width
-C{width}  % Center-aligned with specific width
-R{width}  % Right-aligned with specific width
-X{width}  % Justified with specific width
-```
+Available table commands are `\tableheader`, `\tablesubheader`,
+`\tablecellleft`, `\tablecellcenter`, `\tablecellright`, `\tablecellbold`, and
+`\tablecellrotated`. The `L`, `C`, `R`, and `X` column types accept either
+automatic width or an explicit braced width, such as `L{4cm}`.
 
 ## File Trees
-
-Create visual directory structures with icons:
 
 ```latex
 \begin{filetree}
@@ -209,210 +246,107 @@ Create visual directory structures with icons:
 .1 \treeiconfirst{}.
 .2 \treeicon{src/}.
 .3 \treeicon{main.py}.
-.3 \treeicon{utils.py}.
 .2 \treeicon{README.md}.
-.2 \treeicon{requirements.txt}.
 }
 \end{ptdirtree}
 \end{filetree}
 ```
 
-Automatically recognizes 50+ file extensions with appropriate FontAwesome icons:
+Known archive, audio, code, office, image, PDF, and video extensions receive a
+matching Font Awesome icon. File-tree captions use their own auxiliary list and
+therefore do not appear in the list of figures.
 
-- **Code**: `.py`, `.js`, `.cpp`, `.java`, `.tex`, etc.
-- **Documents**: `.pdf`, `.doc`, `.docx`, `.xls`, `.ppt`
-- **Archives**: `.zip`, `.tar`, `.gz`, `.7z`
-- **Media**: `.jpg`, `.png`, `.mp4`, `.mp3`
+## Lists of Contents
 
-## Code Blocks
-
-```latex
-\begin{ptprintcode}{python}
-def hello_world():
-    print("Hello, World!")
-\end{ptprintcode}
-```
-
-The package automatically:
-
-1. Tries to use `minted` if available and shell-escape is enabled
-2. Falls back to `verbatim` with a warning if not
-3. Applies syntax highlighting (minted) or plain formatting (verbatim)
-
-To compile with minted support:
-
-```bash
-pdflatex -shell-escape document.tex
-```
-
-## List of Contents
-
-Smart list commands that only appear if content exists:
+These commands print a list only when the corresponding counter is nonzero:
 
 ```latex
-\ptlistoftables    % Only shows if tables exist
-\ptlistoffigures   % Only shows if figures exist
-\ptlistofcodes     % Only shows if code listings exist
+\ptlistoftables
+\ptlistoffigures
+\ptlistofcodes
 ```
 
-## Graphics and Images
-
-### Figure Helper
+## Graphics
 
 ```latex
-\ptfigure{h}{width=0.8\textwidth}{image.png}{Caption text}{label}
-% Creates a figure with automatic centering and labeling
+\ptfigure{h}{width=.8\textwidth}{image.png}{Caption}{sample}
+\ptfigure{h}{width=.8\textwidth}{image.png}{Caption}{fig:sample}
 ```
 
-### Background Images
+Both calls create the label `fig:sample`; the `fig:` prefix is optional.
 
 ```latex
 \background{background.jpg}
 \backgroundcredit{Photo by Author}
-```
-
-### Logos
-
-```latex
 \logo{logos/university-logo.png}
 ```
 
 ## Watermarks
 
-Add watermarks with version/build information:
-
 ```latex
 \watermark{DRAFT}
-% Automatically includes version and build if defined
-% Result: "DRAFT - v1.0.42" (if version and build are set)
 ```
 
-The watermark:
-
-- Automatically scales to paper size
-- Positioned at 45° angle
-- Uses `ptred` color at 21% opacity
-- Combines with version/build numbers when available
+When version and build metadata exist, they are appended to the watermark. An
+empty watermark is ignored. PT Commons scales the result to the page, rotates it
+45 degrees, and uses `ptred` at 21% opacity.
 
 ## Utility Commands
 
 ```latex
-\inlinecode{code}                   % Inline code formatting
-\ptinstruction{Review the results.} % Highlighted instruction
-\todayymd                           % Current date as YYYY/MM/DD
-\twodigits{5}                       % Formats number as "05"
+\inlinecode{code}
+\ptinstruction{Review the results.}
+\todayymd
+\twodigits{5}  % 05
 ```
 
-### Caption Commands (non-beamer only)
+`\ptinstruction` uses the active language and is the generic public command for
+highlighting instructions to the document user.
+
+Caption helpers are available in both standard classes and Beamer:
 
 ```latex
-\ptcaption{figure}{Caption text}      % Add caption outside float
-\ptcaptionsame{figure}{Caption text}  % Reuse previous number
+\ptcaption{figure}{Caption text}
+\ptcaptionsame{figure}{Caption text}
 ```
+
+`\ptcaptionsame` reuses the current number while creating a distinct hyperlink
+target. If no earlier caption of that type exists, it creates the first one and
+issues a warning instead of producing number zero.
 
 ## Beamer Compatibility
 
-The package automatically detects when used with beamer and:
-
-- Skips geometry package (conflicts with beamer)
-- Skips caption customization (beamer handles it)
-- Preserves all other functionality
+When Beamer is detected, PT Commons avoids packages that conflict with the
+class, including `geometry`, `caption`, `fancyhdr`, `titlesec`, and `enumitem`.
+It preserves Beamer's optional `\title[short]{long}` and `\date[short]{long}`
+forms.
 
 ## Dependencies
 
-### Required Packages
+Required packages include:
 
-- `adjustbox`, `colortbl`, `enumitem`, `etoolbox`, `expl3`
-- `float`, `fontawesome5`, `graphicx`, `microtype`
-- `newtxsf`, `ragged2e`, `tabularray`, `tcolorbox`
-- `textpos`, `xstring`, `babel`, `totcount`
-- `dirtree`, `xcolor`, `tikz`, `pgfplots`
-- `fancyvrb`, `draftwatermark`, `iftex`
-- `hyperref` (loaded with guard for beamer)
+- `adjustbox`, `babel`, `caption` or `capt-of`, `colortbl`, `dirtree`
+- `draftwatermark`, `enumitem`, `etoolbox`, `expl3`, `fancyhdr`, `fancyvrb`
+- `FiraSans`, `FiraMono` or `beramono`, `fix-cm`, `float`, `fontawesome5`, `geometry`, `graphicx`, `hyperref`, `iftex`
+- `letltxmacro`, `microtype`, `newtxsf`, `pgfplots`, `ragged2e`
+- `tabularray`, `tcolorbox`, `textpos`, `tikz`, `titlesec`, `totcount`, `xcolor`, `xstring`
 
-### Optional Packages
+Class-sensitive packages are loaded only where applicable. `minted` is optional.
 
-- `minted` - Enhanced code highlighting (requires `-shell-escape`)
-- `listings` - Alternative code formatting
-
-### Fonts
-
-- **Sans-serif**: Fira Sans (scaled 0.85)
-- **Monospace**: Inconsolata (scaled 0.85)
-
-## Examples
-
-### Academic Paper
-
-```latex
-\documentclass{article}
-\usepackage[english]{pt-commons}
-
-\title{Machine Learning Applications}
-\titlesub{A Comprehensive Study}
-\addauthor{Jane}{Doe}{jane@uni.edu}{CS Dept, University}
-\version{1.0}
-\build{auto}
-
-\begin{document}
-\maketitle
-\titleauthorsboxes
-\titleauthorsfootnotes
-
-\tableofcontents
-\ptlistoffigures
-\ptlistoftables
-
-% Content...
-
-\end{document}
-```
-
-### Corporate Report
-
-```latex
-\documentclass{report}
-\usepackage{pt-commons}
-
-\title{Q4 Financial Report}
-\corporationname{Tech Solutions Inc.}
-\corporationdepartment{Finance Division}
-\version{2.1}
-\watermark{CONFIDENTIAL}
-
-\begin{document}
-% Content...
-\end{document}
-```
+The configured text font is Fira Sans (scaled to 0.85). The monospaced font is
+Bera Mono under PDFLaTeX and Fira Mono under XeLaTeX or LuaLaTeX, scaled to 0.8.
 
 ## License
 
-MIT License
-
-Copyright (c) 2025 Pedro Toledo Correa
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+This work may be distributed and/or modified under the conditions of the LaTeX
+Project Public License, version 1.3c or later. See
+<https://www.latex-project.org/lppl.txt>.
 
 ## Support
 
-For issues, suggestions, or contributions, please contact the package maintainer or visit the package repository.
+For issues, suggestions, or contributions, contact the package maintainer or
+visit the package repository.
 
 ---
 
-**Last Updated:** October 2025
+**Last Updated:** August 2026

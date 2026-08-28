@@ -1,8 +1,14 @@
 *.aux
+*.buildcount
+*.fdb_latexmk
+*.fls
 *.log
 *.out
 *.pdf
 *.gz
 *.lof
+*.loft
 *.lot
 *.toc
+*.synctex.gz
+_minted-*

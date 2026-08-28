@@ -1,0 +1,347 @@
+%%
+%% pt-commons-content.sty
+%% Content helpers for the PT document class family
+%%
+%% Author: Pedro Toledo Correa
+%% Repo: https://github.com/ptoledo-teaching/pt-commons
+%% License: LaTeX Project Public License 1.3c or later
+%% Created: 2026-08-28
+%% Updated: 2026-08-28
+%% Version: v0.2
+%%
+%% This work may be distributed and/or modified under the conditions of the
+%% LaTeX Project Public License, version 1.3c or later.
+%%
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{pt-commons-content}[2026/08/28 v0.2 PT Commons Content]
+\makeatletter
+
+% Dependencies %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\RequirePackage{colortbl}
+\RequirePackage{dirtree}
+\RequirePackage{fancyvrb}
+\RequirePackage{tabularray}
+\RequirePackage{tcolorbox}
+\RequirePackage{totcount}
+
+% Minted is optional. If the package itself is unavailable, fall back to the
+% FancyVerb implementation just as the explicit nominted option does.
+\ifpt@useminted
+    \@ifpackageloaded{minted}{}{%
+        \IfFileExists{minted.sty}{%
+            \RequirePackage[newfloat]{minted}%
+        }{%
+            \PackageWarningNoLine{pt-commons}{minted.sty not found; using the verbatim fallback}%
+            \pt@usemintedfalse
+        }%
+    }%
+\fi
+
+% Caption localization %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Minted defines these names when enabled; the fallback needs compatible names.
+\providecommand{\listingname}{}
+\providecommand{\listlistingname}{}
+
+\addto\captionsspanish{%
+    \renewcommand{\tablename}{Tabla}%
+    \renewcommand{\listtablename}{Lista de tablas}%
+    \renewcommand{\listingname}{Código}%
+    \renewcommand{\listlistingname}{Lista de códigos}%
+    \floatname{filetree}{Árbol de archivos}%
+}
+\addto\captionsenglish{%
+    \renewcommand{\tablename}{Table}%
+    \renewcommand{\listtablename}{Tables}%
+    \renewcommand{\listingname}{Code}%
+    \renewcommand{\listlistingname}{List of Codes}%
+    \floatname{filetree}{File Tree}%
+}
+\addto\captionsfrench{%
+    \renewcommand{\tablename}{Tableau}%
+    \renewcommand{\listtablename}{Liste des tableaux}%
+    \renewcommand{\listingname}{Code}%
+    \renewcommand{\listlistingname}{Liste des codes}%
+    \floatname{filetree}{Arbre de fichiers}%
+}
+\addto\captionsportuguese{%
+    \renewcommand{\tablename}{Tabela}%
+    \renewcommand{\listtablename}{Listas de tabelas}%
+    \renewcommand{\listingname}{Código}%
+    \renewcommand{\listlistingname}{Listas de códigos}%
+    \floatname{filetree}{Árvore de arquivos}%
+}
+
+% Preserve the internal helper used by existing documents that load listings.
+\newcommand{\pt@captionsetup@listing}[1]{%
+    \@ifundefined{lstlisting}{}{%
+        \@ifundefined{captionsetup}{}{\captionsetup[listing]{#1}}%
+    }%
+}
+
+% Lists of contents %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\@ifundefined{c@table}{}{\regtotcounter{table}}
+\@ifundefined{c@figure}{}{\regtotcounter{figure}}
+
+\newcommand{\ptlistoftables}{%
+    \@ifundefined{c@table}{}{%
+        \ifnum\totvalue{table}>0
+            \listoftables
+        \fi
+    }%
+}
+\newcommand{\ptlistoffigures}{%
+    \@ifundefined{c@figure}{}{%
+        \ifnum\totvalue{figure}>0
+            \listoffigures
+        \fi
+    }%
+}
+\newcommand{\ptlistofcodes}{%
+    \@ifundefined{c@listing}{}{%
+        \@ifundefined{listoflistings}{}{%
+            \ifnum\totvalue{listing}>0\relax
+                \listoflistings
+            \fi
+        }%
+    }%
+}
+
+% File trees %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\DTsetlength{0.1cm}{0.2cm}{0.1cm}{0.4pt}{0pt}
+\setlength{\DTbaselineskip}{0.5cm}
+\renewcommand{\DTstyle}{\ttfamily\scriptsize}
+\renewcommand{\DTstylecomment}{\normalfont\footnotesize}
+
+\newcommand{\treeicon}[1]{%
+    \begingroup
+    \newif\if@iconfound
+    \@iconfoundfalse
+    \newcommand{\iconbox}[1]{\makebox[0.25cm][c]{\faIcon[regular]{##1}}}%
+    \def\filename{#1}%
+    % Extract extension.
+    \StrBehind{\filename}{.}[\ext]%
+    % Empty
+    \IfStrEq{\filename}{}{\iconbox{file}\ \@iconfoundtrue}{}%
+    % Archive
+    \IfStrEq{\ext}{zip}{\iconbox{file-archive}\ #1\@iconfoundtrue}{}%
+    \IfStrEq{\ext}{rar}{\iconbox{file-archive}\ #1\@iconfoundtrue}{}%
+    \IfStrEq{\ext}{tar}{\iconbox{file-archive}\ #1\@iconfoundtrue}{}%
+    \IfStrEq{\ext}{gz}{\iconbox{file-archive}\ #1\@iconfoundtrue}{}%
+    \IfStrEq{\ext}{7z}{\iconbox{file-archive}\ #1\@iconfoundtrue}{}%
+    % Audio
+    \IfStrEq{\ext}{mp3}{\iconbox{file-audio}\ #1\@iconfoundtrue}{}%
+    \IfStrEq{\ext}{wav}{\iconbox{file-audio}\ #1\@iconfoundtrue}{}%
+    \IfStrEq{\ext}{ogg}{\iconbox{file-audio}\ #1\@iconfoundtrue}{}%
+    % Code
+    \IfStrEq{\ext}{c}{\iconbox{file-code}\ #1\@iconfoundtrue}{}%
+    \IfStrEq{\ext}{cpp}{\iconbox{file-code}\ #1\@iconfoundtrue}{}%
+    \IfStrEq{\ext}{h}{\iconbox{file-code}\ #1\@iconfoundtrue}{}%
+    \IfStrEq{\ext}{hpp}{\iconbox{file-code}\ #1\@iconfoundtrue}{}%
+    \IfStrEq{\ext}{java}{\iconbox{file-code}\ #1\@iconfoundtrue}{}%
+    \IfStrEq{\ext}{py}{\iconbox{file-code}\ #1\@iconfoundtrue}{}%
+    \IfStrEq{\ext}{js}{\iconbox{file-code}\ #1\@iconfoundtrue}{}%
+    \IfStrEq{\ext}{ts}{\iconbox{file-code}\ #1\@iconfoundtrue}{}%
+    \IfStrEq{\ext}{css}{\iconbox{file-code}\ #1\@iconfoundtrue}{}%
+    \IfStrEq{\ext}{html}{\iconbox{file-code}\ #1\@iconfoundtrue}{}%
+    \IfStrEq{\ext}{xml}{\iconbox{file-code}\ #1\@iconfoundtrue}{}%
+    \IfStrEq{\ext}{json}{\iconbox{file-code}\ #1\@iconfoundtrue}{}%
+    \IfStrEq{\ext}{sh}{\iconbox{file-code}\ #1\@iconfoundtrue}{}%
+    \IfStrEq{\ext}{rb}{\iconbox{file-code}\ #1\@iconfoundtrue}{}%
+    \IfStrEq{\ext}{php}{\iconbox{file-code}\ #1\@iconfoundtrue}{}%
+    \IfStrEq{\ext}{go}{\iconbox{file-code}\ #1\@iconfoundtrue}{}%
+    \IfStrEq{\ext}{rs}{\iconbox{file-code}\ #1\@iconfoundtrue}{}%
+    \IfStrEq{\ext}{tex}{\iconbox{file-code}\ #1\@iconfoundtrue}{}%
+    % Office
+    \IfStrEq{\ext}{xls}{\iconbox{file-excel}\ #1\@iconfoundtrue}{}%
+    \IfStrEq{\ext}{xlsx}{\iconbox{file-excel}\ #1\@iconfoundtrue}{}%
+    \IfStrEq{\ext}{doc}{\iconbox{file-word}\ #1\@iconfoundtrue}{}%
+    \IfStrEq{\ext}{docx}{\iconbox{file-word}\ #1\@iconfoundtrue}{}%
+    \IfStrEq{\ext}{ppt}{\iconbox{file-powerpoint}\ #1\@iconfoundtrue}{}%
+    \IfStrEq{\ext}{pptx}{\iconbox{file-powerpoint}\ #1\@iconfoundtrue}{}%
+    % Image
+    \IfStrEq{\ext}{jpg}{\iconbox{file-image}\ #1\@iconfoundtrue}{}%
+    \IfStrEq{\ext}{jpeg}{\iconbox{file-image}\ #1\@iconfoundtrue}{}%
+    \IfStrEq{\ext}{png}{\iconbox{file-image}\ #1\@iconfoundtrue}{}%
+    \IfStrEq{\ext}{gif}{\iconbox{file-image}\ #1\@iconfoundtrue}{}%
+    \IfStrEq{\ext}{svg}{\iconbox{file-image}\ #1\@iconfoundtrue}{}%
+    % PDF
+    \IfStrEq{\ext}{pdf}{\iconbox{file-pdf}\ #1\@iconfoundtrue}{}%
+    % Video
+    \IfStrEq{\ext}{mp4}{\iconbox{file-video}\ #1\@iconfoundtrue}{}%
+    \IfStrEq{\ext}{avi}{\iconbox{file-video}\ #1\@iconfoundtrue}{}%
+    \IfStrEq{\ext}{mov}{\iconbox{file-video}\ #1\@iconfoundtrue}{}%
+    \IfStrEq{\ext}{mkv}{\iconbox{file-video}\ #1\@iconfoundtrue}{}%
+    % Default
+    \if@iconfound\else
+        \IfStrEq{\ext}{}{\iconbox{folder-open}\ #1}{\iconbox{file}\ #1}%
+    \fi
+    \endgroup
+}
+
+\newcommand{\treeiconfirst}[1]{%
+    \hspace{0.1cm}\treeicon{#1}%
+}
+
+% Use a dedicated auxiliary extension so file-tree captions do not leak into
+% the list of figures.
+\newfloat{filetree}{htbp}{loft}
+\newenvironment{ptdirtree}{%
+    \hspace*{-0.4cm}%
+    \begin{minipage}{.875\columnwidth}%
+    \vspace{0.25cm}%
+}{%
+    \vspace{0.4cm}%
+    \end{minipage}%
+}
+
+% Graphics %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\RequirePackage{tikz}
+\usetikzlibrary{fadings}
+\tikzfading[
+    name=title page picture fading,
+    left color=transparent!0,
+    right color=transparent!100,
+]
+
+\RequirePackage{pgfplots}
+\usepgfplotslibrary{groupplots}
+\pgfplotsset{compat=1.18}
+
+\newcommand{\ptfigure}[5]{%
+    % 1: Position (h, t, b, p)
+    % 2: Options (width, height, scale, etc.)
+    % 3: Image path
+    % 4: Caption
+    % 5: Label, with or without the fig: prefix
+    \begin{figure}[#1]
+        \centering
+        \includegraphics[#2]{#3}
+        \caption{#4}
+        \IfBeginWith{#5}{fig:}{\label{#5}}{\label{fig:#5}}%
+    \end{figure}%
+}
+
+% Tables %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Center tables in a local group so the declaration cannot affect later text.
+\BeforeBeginEnvironment{tblr}{\begingroup\centering}
+\AfterEndEnvironment{tblr}{\endgroup}
+\SetTblrInner{rowsep=0.6pt}
+\SetTblrInner{colsep=3pt}
+\SetTblrInner{width=\columnwidth}
+
+\ExplSyntaxOn
+\cs_new_protected:Npn \pt_tblr_new_auto_width_column_type:nn #1 #2
+{
+    \exp_args:Nc \NewDocumentCommand { tblr_Column_type_ #1 } { g }
+    {
+        \bool_gset_false:N \g__tblr_colrow_spec_expand_stop_bool
+        \IfNoValueTF {##1}
+        { \tl_gput_right:Nn \g__tblr_expanded_colrow_spec_tl { Q[#2,t,co=1] } }
+        { \tl_gput_right:Nn \g__tblr_expanded_colrow_spec_tl { Q[#2,t,wd=##1] } }
+        \__tblr_expand_colrow_spec_next:N
+    }
+    \str_gput_right:Nn \gTblrUsedColumnTypeStr {#1}
+}
+\pt_tblr_new_auto_width_column_type:nn { L } { l }
+\pt_tblr_new_auto_width_column_type:nn { C } { c }
+\pt_tblr_new_auto_width_column_type:nn { R } { r }
+\exp_args:Nc \RenewDocumentCommand { tblr_Column_type_ X } { o g }
+{
+    \bool_gset_false:N \g__tblr_colrow_spec_expand_stop_bool
+    \IfNoValueTF {#2}
+    {
+        \IfNoValueTF {#1}
+        { \tl_gput_right:Nn \g__tblr_expanded_colrow_spec_tl { Q[j,t,co=1] } }
+        { \tl_gput_right:Nn \g__tblr_expanded_colrow_spec_tl { Q[j,t,co=1,#1] } }
+    }
+    {
+        \IfNoValueTF {#1}
+        { \tl_gput_right:Nn \g__tblr_expanded_colrow_spec_tl { Q[j,t,wd=#2] } }
+        { \tl_gput_right:Nn \g__tblr_expanded_colrow_spec_tl { Q[j,t,#1,wd=#2] } }
+    }
+    \__tblr_expand_colrow_spec_next:N
+}
+\ExplSyntaxOff
+
+\NewTableCommand\tableheader{%
+    \SetRow{%
+        ptblue!42,
+        c,
+        font=\bfseries
+    }%
+}
+\NewTableCommand\tablesubheader{%
+    \SetRow{ptblue!21}%
+}
+\NewTableCommand\tablecellleft{%
+    \SetCell{halign=l,valign=t}%
+}
+\NewTableCommand\tablecellcenter{%
+    \SetCell{halign=c,valign=t}%
+}
+\NewTableCommand\tablecellright{%
+    \SetCell{halign=r,valign=t}%
+}
+\NewTableCommand\tablecellbold{%
+    \SetCell{font=\bfseries}%
+}
+\newcommand{\tablecellrotated}[1]{\rotatebox{90}{#1\hspace{4pt}}}
+
+% Code %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\ifpt@useminted
+    \@ifundefined{c@listing}{}{\regtotcounter{listing}}
+    \setminted{%
+        bgcolor=ptgray!42,
+        fontfamily=tt,
+        fontsize=\small,
+        autogobble=true,
+        linenos=true,
+        tabsize=4,
+        numbersep=5pt,
+        baselinestretch=0.75,
+        showspaces=false,
+        vspace=0.25cm
+    }
+    \newenvironment{ptprintcode}[1]{%
+        \VerbatimEnvironment
+        \begin{minted}[%
+            style=bw,
+            bgcolor=white,
+            frame=single
+        ]{#1}%
+    }{%
+        \end{minted}%
+    }
+\else
+    \newenvironment{ptprintcode}[1]{%
+        \VerbatimEnvironment
+        \Verbatim
+    }{%
+        \endVerbatim
+    }
+\fi
+
+% Enhanced environments %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newenvironment{highlightbox}{%
+    \begin{tcolorbox}[
+        colback=ptblue!14,
+        colframe=ptblue,
+        boxrule=0.4pt,
+        arc=3pt,
+        outer arc=3pt
+    ]%
+}{%
+    \end{tcolorbox}%
+}
+
+\makeatother
+\endinput

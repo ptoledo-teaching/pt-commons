@@ -173,11 +173,11 @@ For code that should be printed without syntax highlighting:
     hello_world()
 \end{ptprintcode}
 
-\subsection{Minted Code (with highlighting)}
+\subsection{Portable Highlighted Code}
 
-For syntax-highlighted code (requires minted package):
+The same environment uses Minted when enabled and the plain fallback otherwise:
 
-\begin{minted}{python}
+\begin{ptprintcode}{python}
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -193,7 +193,7 @@ def plot_sine_wave(freq=1.0, phase=0.0):
     plt.ylabel('sin(x)')
     plt.title(f'Sine Wave (freq={freq}, phase={phase})')
     plt.show()
-\end{minted}
+\end{ptprintcode}
 
 \section{Graphics and Plots}
 
@@ -314,7 +314,7 @@ For institutional documents:
 
 For corporate documents:
 \begin{itemize}
-    \item \inlinecode{\textbackslash corporationname\{...\}} - Company name
+    \item \inlinecode{\textbackslash corporation\{...\}} - Company name
     \item \inlinecode{\textbackslash corporationdepartment\{...\}} - Department
 \end{itemize}
 

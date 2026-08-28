@@ -1,0 +1,184 @@
+%%
+%% pt-commons-runtime.sty
+%% Runtime hooks and watermark support for the PT document class family
+%%
+%% Author: Pedro Toledo Correa
+%% Repo: https://github.com/ptoledo-teaching/pt-commons
+%% License: LaTeX Project Public License 1.3c or later
+%% Created: 2026-08-28
+%% Updated: 2026-08-28
+%% Version: v0.2
+%%
+%% This work may be distributed and/or modified under the conditions of the
+%% LaTeX Project Public License, version 1.3c or later.
+%%
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{pt-commons-runtime}[2026/08/28 v0.2 PT Commons Runtime]
+\makeatletter
+
+% Build count %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newread\pt@buildread
+\newwrite\pt@buildfile
+
+\ExplSyntaxOn
+\cs_new_protected:Npn \pt_build_count_invalid:
+{
+    \PackageWarningNoLine{pt-commons}
+        {Invalid~build~count~in~`\buildcountfile';~using~0}
+    \def\buildcount{0}
+}
+\newcommand{\pt@validatebuildcount}{
+    \tl_set:NV \l_tmpa_tl \buildcount
+    \tl_trim_spaces:N \l_tmpa_tl
+    \regex_match:nVTF { \A \d+ \Z } \l_tmpa_tl
+        {
+            \regex_replace_once:nnN { \A 0+ } { } \l_tmpa_tl
+            \tl_if_empty:NT \l_tmpa_tl { \tl_set:Nn \l_tmpa_tl { 0 } }
+            \int_compare:nNnTF { \str_count:N \l_tmpa_tl } < { 10 }
+                { \edef\buildcount{\tl_use:N \l_tmpa_tl} }
+                {
+                    \int_compare:nNnTF { \str_count:N \l_tmpa_tl } = { 10 }
+                        {
+                            \str_compare:eNeTF
+                                { \l_tmpa_tl } > { 2147483646 }
+                                { \pt_build_count_invalid: }
+                                { \edef\buildcount{\tl_use:N \l_tmpa_tl} }
+                        }
+                        { \pt_build_count_invalid: }
+                }
+        }
+        { \pt_build_count_invalid: }
+}
+\ExplSyntaxOff
+
+\newcommand{\buildcountfile}{%
+    \ifdefined\pt@version
+        \ifdefempty{\pt@version}{\jobname.buildcount}{\jobname\pt@version.buildcount}%
+    \else
+        \jobname.buildcount%
+    \fi
+}
+
+\newcommand{\pt@loadbuildcount}{%
+    \def\buildcount{0}%
+    \ifdefined\pt@build
+        \ifdefstring{\pt@build}{auto}{%
+            \IfFileExists{\buildcountfile}{%
+                \openin\pt@buildread=\buildcountfile
+                \read\pt@buildread to\buildcount
+                \closein\pt@buildread
+                \ifx\buildcount\empty
+                    \def\buildcount{0}%
+                \fi
+                \pt@validatebuildcount
+            }{}%
+        }{}%
+    \fi
+}
+
+\newcommand{\pt@writebuildcount}{%
+    \immediate\openout\pt@buildfile=\buildcountfile
+    \edef\pt@nextbuildcount{\number\numexpr\buildcount+1\relax}%
+    \immediate\write\pt@buildfile{\pt@nextbuildcount}%
+    \immediate\closeout\pt@buildfile
+}
+
+% Watermark %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\@ifpackageloaded{draftwatermark}{}{\RequirePackage[stamp=false]{draftwatermark}}
+
+% Allocate reusable lengths once. The PT classes can still replace
+% \setupwatermark without colliding with these package-private names.
+\newlength{\pt@watermarkheight}
+\newlength{\pt@watermarklength}
+\newlength{\pt@watermarktargetlength}
+\newlength{\pt@watermarkwidth}
+\newlength{\pt@watermarkfinal}
+
+\newcommand{\setupwatermark}[1]{%
+    \begingroup
+    \fontsize{5cm}{6cm}\selectfont
+    \settowidth{\pt@watermarkwidth}{#1}%
+    \settoheight{\pt@watermarkheight}{#1}%
+    \ifdim\pt@watermarkwidth>\pt@watermarkheight
+        \global\setlength{\pt@watermarklength}{\pt@watermarkwidth}%
+    \else
+        \global\setlength{\pt@watermarklength}{\pt@watermarkheight}%
+    \fi
+    \endgroup
+    \ifdim\pt@watermarklength=0pt
+        \PackageWarningNoLine{pt-commons}{Empty watermark ignored}%
+    \else
+        \ifdim\paperwidth<\paperheight
+            \setlength{\pt@watermarktargetlength}{1.2\paperwidth}%
+        \else
+            \setlength{\pt@watermarktargetlength}{1.2\paperheight}%
+        \fi
+        \setlength{\pt@watermarkfinal}{%
+            \dimexpr4cm*\pt@watermarktargetlength/\pt@watermarklength\relax
+        }%
+        \SetWatermarkText{#1}%
+        \SetWatermarkFontSize{\pt@watermarkfinal}%
+        \SetWatermarkAngle{45}%
+        \SetWatermarkColor{ptred!21}%
+        \@ifclassloaded{beamer}{%
+            \SetWatermarkHorCenter{0.4\paperwidth}%
+        }{%
+            \SetWatermarkHorCenter{0.5\paperwidth}%
+        }%
+    \fi
+}
+
+\newcommand{\pt@watermarkbuildonly}{%
+    \ifdefined\pt@build
+        \ifdefempty{\pt@build}{}{%
+            \ifdefstring{\pt@build}{auto}{\ - B\buildcount}{\ - B\pt@build}%
+        }%
+    \fi
+}
+
+% Runtime hooks %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\AtBeginDocument{%
+    \pt@loadbuildcount
+    \hypersetup{%
+        linkcolor=ptlightblue,
+        urlcolor=ptlightblue,
+        citecolor=ptlightblue
+    }%
+    \ifdefined\pt@watermark
+        \ifdefempty{\pt@watermark}{}{%
+            \DraftwatermarkOptions{stamp=true}%
+            % Resolve \setupwatermark at runtime so classes may override it.
+            \setupwatermark{%
+                \pt@watermark
+                \ifdefined\pt@version
+                    \ifdefempty{\pt@version}{%
+                        \pt@watermarkbuildonly
+                    }{%
+                        \ - v\pt@version
+                        \ifdefined\pt@build
+                            \ifdefempty{\pt@build}{}{%
+                                \ifdefstring{\pt@build}{auto}{.\buildcount}{.\pt@build}%
+                            }%
+                        \fi
+                    }%
+                \else
+                    \pt@watermarkbuildonly
+                \fi
+            }%
+        }%
+    \fi
+    \sloppy
+}
+
+\AtEndDocument{%
+    \ifdefined\pt@build
+        \ifdefstring{\pt@build}{auto}{\pt@writebuildcount}{}%
+    \fi
+}
+
+\makeatother
+\endinput
