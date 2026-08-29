@@ -63,10 +63,39 @@
 
 % Utility commands %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% Spanish Babel makes < and > active to recognize <<...>>. A trailing active
-% character needs a harmless look-ahead token before this command closes its
-% local group.
-\newcommand{\inlinecode}[1]{{\ttfamily\bfseries #1\relax}}
+% Plain code is rebuilt with ordinary character tokens so ~, _, <, and > retain
+% their literal meaning while every glyph uses the same bold monospaced font.
+% Arguments containing LaTeX commands keep normal expansion, which permits
+% explicit formatting such as \textbackslash and \_.
+\ExplSyntaxOn
+\bool_new:N \l__pt_inlinecode_command_bool
+\cs_new_protected:Npn \pt_inlinecode:n #1
+  {
+    \group_begin:
+    \bool_set_false:N \l__pt_inlinecode_command_bool
+    \tl_analysis_map_inline:nn {#1}
+      {
+        \str_if_eq:nnT {##3} {0}
+          {
+            \bool_set_true:N \l__pt_inlinecode_command_bool
+            \tl_map_break:
+          }
+      }
+    \bool_if:NTF \l__pt_inlinecode_command_bool
+      { \ttfamily \bfseries #1 \relax }
+      {
+        \ttfamily \bfseries
+        \tl_analysis_map_inline:nn {#1}
+          {
+            \str_if_eq:nnTF {##3} {A}
+              { \c_space_tl }
+              { \char_generate:nn {##2} {12} }
+          }
+      }
+    \group_end:
+  }
+\NewDocumentCommand{\inlinecode}{m}{\pt_inlinecode:n {#1}}
+\ExplSyntaxOff
 \newcommand{\twodigits}[1]{% Format a numeric expression using at least two digits.
     \ifnum\numexpr#1\relax<10 %
         0%

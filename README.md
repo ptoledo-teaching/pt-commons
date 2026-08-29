@@ -380,10 +380,14 @@ empty watermark is ignored. PT Commons scales the result to the page, rotates it
 ```latex
 \inlinecode{code}
 \inlinecode{bucket-<normalized-id>}
+\inlinecode{~/.ssh/id_ed25519}
 \ptinstruction{Review the results.}
 \todayymd
 \twodigits{5}  % 05
 ```
+
+Plain `\inlinecode` content treats code punctuation literally, including `~`,
+`_`, `<`, and `>`, so these characters do not require LaTeX escapes.
 
 `\ptinstruction` uses the active language and is the generic public command for
 highlighting instructions to the document user.
