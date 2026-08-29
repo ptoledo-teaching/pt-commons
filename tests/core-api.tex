@@ -1,0 +1,47 @@
+% Contract coverage for the public PT Commons integration API.
+\documentclass{article}
+\usepackage[english,spanish]{babel}
+\usepackage[coreonly,english,nominted]{pt-commons}
+
+\title{Core API title}
+\date{}
+
+\typeout{PT-CORE-LABEL-PREAMBLE=\ptlabel{toc}}
+
+\ptifauthors
+  {\newif\ifptunexpectedauthorsbefore}
+  {\typeout{PT-CORE-AUTHORS-BEFORE=empty}}
+\addauthor{Ada}{Lovelace}{ada@example.com}{Analytical Engine Group}
+\ptifauthors
+  {\typeout{PT-CORE-AUTHORS-AFTER=present}}
+  {\newif\ifptunexpectedauthorsafter}
+
+\begin{document}
+
+\ptiflayoutloaded
+  {\newif\ifptunexpectedlayout}
+  {\typeout{PT-CORE-LAYOUT=off}}
+\ptifcontentloaded
+  {\newif\ifptunexpectedcontent}
+  {\typeout{PT-CORE-CONTENT=off}}
+\ptifruntimeloaded
+  {\newif\ifptunexpectedruntime}
+  {\typeout{PT-CORE-RUNTIME=off}}
+\ptifmetadata{title}
+  {\typeout{PT-CORE-TITLE=present}}
+  {\newif\ifptunexpectedtitle}
+\ptifmetadatadefined{date}
+  {\ptifmetadata{date}
+     {\newif\ifptunexpectednonemptydate}
+     {\typeout{PT-CORE-DATE=defined-empty}}}
+  {\newif\ifptunexpectedundefineddate}
+\typeout{PT-CORE-LABEL-TOC=\ptlabel{toc}}
+\typeout{PT-CORE-LABEL-QUESTIONS=\ptlabel{questions}}
+\selectlanguage{spanish}
+\typeout{PT-CORE-LABEL-SPANISH=\ptlabel{toc}}
+\selectlanguage{english}
+\typeout{PT-CORE-LABEL-ENGLISH=\ptlabel{toc}}
+
+Public API smoke test.
+
+\end{document}

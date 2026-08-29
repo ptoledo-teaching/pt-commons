@@ -1,7 +1,7 @@
 # PT Commons Package
 
-**Version:** 0.3<br>
-**Date:** 2026/08/28<br>
+**Version:** 0.4<br>
+**Date:** 2026/08/29<br>
 **Author:** Pedro Toledo Correa<br>
 **License:** LaTeX Project Public License 1.3c or later<br>
 **Repository:** [GitHub - ptoledo-teaching/pt-commons](https://github.com/ptoledo-teaching/pt-commons)
@@ -37,6 +37,29 @@ internal modules:
 
 The four implementation modules are internal: documents should continue to
 load only `pt-commons`.
+
+PT host classes can use the module-state selectors exposed by the facade:
+`\ptiflayoutloaded`, `\ptifcontentloaded`, and `\ptifruntimeloaded`. This avoids
+coupling classes to the package's private module switches.
+
+Shared metadata is exposed without revealing its storage macros:
+`\ptmetadata{title}` reads a value, `\ptifmetadata{title}{...}{...}` branches
+on a non-empty value, and `\ptifmetadatadefined{date}{...}{...}` distinguishes
+an omitted setter from an explicitly empty one. Supported keys are `version`,
+`build`, `buildsources`, `title`, `date`, `titlesub`, `titlesubsub`, `classcode`,
+`classsemester`, `classname`, `workgroup`, `department`, `school`, `university`,
+`corporation`, `corporationdepartment`, `background`, `backgroundcredit`,
+`logo`, and `watermark`. Unknown keys produce a package error rather than
+exposing similarly named implementation macros.
+
+Author-aware hosts can branch with `\ptifauthors{...}{...}`. Shared localized
+strings are available in the preamble and document through `\ptlabel{toc}`,
+`\ptlabel{questions}`,
+`\ptlabel{instruction}`, `\ptlabel{backgroundsource}`, and
+`\ptlabel{templatecredit}`.
+
+Run `sh tests/check-core-api.sh` to verify this integration contract with all
+three supported engines.
 
 ## Installation
 
@@ -99,8 +122,9 @@ can disable the optional modules independently:
 
 `minimal` is an alias for `coreonly`; `full` restores all modules. The positive
 options `layout`, `content`, and `runtime` can be combined after `coreonly`.
-Options are applied from left to right. The PT classes forward these options,
-while keeping the packages required by their own class implementation.
+Options are applied from left to right. PT host classes expose namespaced
+counterparts such as `ptlayout` and `ptcontent` so these generic package option
+names do not leak to unrelated packages; consult each class for its exact API.
 
 Core-only mode retains metadata, languages, authors, colors, links,
 `\ptinstruction`, and caption helpers. It does not load PT typography, table and
@@ -222,8 +246,12 @@ parentheses or footnotes.
 \titleauthorsfooter{; }  % Names and non-empty emails
 \titleauthorsboxes       % Centered author minipages
 \titleauthorsfootnotes   % Affiliations as footnotes
-\titleauthorstable       % Authors in tabular form
+\titleauthorstable       % Natural-width table; wraps only when needed
 ```
+
+`\titleauthorstable` keeps its natural width when it fits the available line
+and switches to a wrapping `tabularx` only for oversized author data. The host
+class chooses whether that table is centered or right-aligned.
 
 ## Colors
 
@@ -385,7 +413,7 @@ PT Commons requires LaTeX 2023-06-01 or newer.
 Dependencies are scoped by module:
 
 - Core: `babel`, `caption` or `capt-of`, `etoolbox`, `expl3`, `hyperref`,
-  `letltxmacro`, and `xcolor`.
+  `letltxmacro`, `tabularx`, and `xcolor`.
 - Layout: `enumitem`, `fancyhdr`, `iftex`, `microtype`, `newtxsf`, `titlesec`,
   Fira Sans, and Bera Mono or Fira Mono.
 - Content: `colortbl`, `dirtree`, `fancyvrb`, `float`, `fontawesome5`,
