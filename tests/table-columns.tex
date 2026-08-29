@@ -1,0 +1,61 @@
+% Contract coverage for the PT Commons Tabularray column specifications.
+% Compile from the repository root with:
+%   sh tests/check-table-columns.sh pdflatex xelatex lualatex
+\documentclass{article}
+\usepackage[margin=1in]{geometry}
+\usepackage[coreonly,content,nominted]{pt-commons}
+
+\begin{document}
+
+Outside a table, a code placeholder remains literal:
+\inlinecode{bucket-<normalized-id>}.
+
+\begin{tblr}{hlines,vlines,colspec={|L{2cm}|X|}}
+Fixed width &
+The flexible X column must wrap this long sentence after a fixed-width
+L column without printing any part of the column specification.
+\\
+Placeholder &
+\inlinecode{bucket-<normalized-id>} remains literal inside a flexible X column.
+\end{tblr}
+
+\begin{tblr}{hlines,vlines,colspec={|C{78pt}|X|}}
+Centered &
+The flexible X column must also wrap after a centered fixed-width column.
+\end{tblr}
+
+\begin{tblr}{hlines,vlines,colspec={|X|R{24pt}|}}
+The flexible X column must wrap before a right-aligned fixed-width column. &
+R
+\end{tblr}
+
+\begin{tblr}{hlines,vlines,colspec={|L|C|R|}}
+The flexible L column wraps and remains left aligned. &
+The flexible C column wraps and remains centered. &
+The flexible R column wraps and remains right aligned.
+\end{tblr}
+
+\begin{tblr}{
+  hlines,
+  vlines,
+  colspec={X[l]{0.44\linewidth}X[r]{0.44\linewidth}}
+}
+The fixed-width X form wraps and remains left aligned. &
+The fixed-width X form wraps and remains right aligned.
+\end{tblr}
+
+\begin{tblr}{hlines,vlines,colspec={X[3]X[4]}}
+The native weighted X form remains available. &
+The second native weighted X form remains available.
+\end{tblr}
+
+\begin{tblr}{
+  hlines,
+  vlines,
+  colspec={X[l,wd=0.44\linewidth]X[r,wd=0.44\linewidth]}
+}
+The native key-based fixed-width X form remains available. &
+The second native key-based fixed-width X form remains available.
+\end{tblr}
+
+\end{document}

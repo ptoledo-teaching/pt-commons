@@ -62,7 +62,10 @@
 
 % Utility commands %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\newcommand{\inlinecode}[1]{{\ttfamily\bfseries #1}}
+% Spanish Babel makes < and > active to recognize <<...>>. A trailing active
+% character needs a harmless look-ahead token before this command closes its
+% local group.
+\newcommand{\inlinecode}[1]{{\ttfamily\bfseries #1\relax}}
 \newcommand{\twodigits}[1]{% Format a numeric expression using at least two digits.
     \ifnum\numexpr#1\relax<10 %
         0%

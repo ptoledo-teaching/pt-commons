@@ -1,0 +1,15 @@
+% Verify that PT Commons does not replace a column type registered by the host.
+\documentclass{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{tabularray}
+\NewTblrColumnType{L}[1]{Q[r,t,wd=#1]}
+\usepackage[coreonly,content,nominted]{pt-commons}
+
+\begin{document}
+
+\begin{tblr}{hlines,vlines,colspec={L{2cm}X}}
+Host-defined L &
+The host column remains registered and the adjacent X column wraps normally.
+\end{tblr}
+
+\end{document}

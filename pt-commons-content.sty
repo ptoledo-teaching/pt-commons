@@ -285,9 +285,135 @@
 \SetTblrInner{colsep=3pt}
 \SetTblrInner{width=\columnwidth}
 
-% Do not reserve generic global column names such as L, C, or R. Tabularray's
-% public API has no provide/renew operation, so aliases here would conflict
-% with host documents. Use its native Q and X specifications directly.
+% PT Commons column specifications.
+%
+% L/C/R with optional braced widths and all supported X forms are part of the
+% package's public table API. Tabularray's public definition API cannot express
+% that grammar, so keep the required parser integration isolated here, fail
+% clearly if its backing API changes, and respect types registered by the host.
+\ExplSyntaxOn
+\bool_new:N \l__pt_tblr_parser_api_available_bool
+\bool_set_true:N \l__pt_tblr_parser_api_available_bool
+\cs_if_exist:NF \gTblrUsedColumnTypeStr
+  { \bool_set_false:N \l__pt_tblr_parser_api_available_bool }
+\cs_if_exist:NF \g__tblr_colrow_spec_expand_stop_bool
+  { \bool_set_false:N \l__pt_tblr_parser_api_available_bool }
+\cs_if_exist:NF \g__tblr_expanded_colrow_spec_tl
+  { \bool_set_false:N \l__pt_tblr_parser_api_available_bool }
+\cs_if_exist:NF \__tblr_expand_colrow_spec_next:N
+  { \bool_set_false:N \l__pt_tblr_parser_api_available_bool }
+\cs_if_exist:cF { tblr_Column_type_X }
+  { \bool_set_false:N \l__pt_tblr_parser_api_available_bool }
+
+\cs_new_protected:Npn \__pt_tblr_append_flexible_column:n #1
+  {
+    \tl_gput_right:Nn \g__tblr_expanded_colrow_spec_tl
+      { Q[#1,t,co=1] }
+    \__tblr_expand_colrow_spec_next:N
+  }
+
+\cs_new_protected:Npn \__pt_tblr_append_fixed_column:nn #1#2
+  {
+    \tl_gput_right:Nn \g__tblr_expanded_colrow_spec_tl
+      { Q[#1,t,wd=#2] }
+    \__tblr_expand_colrow_spec_next:N
+  }
+
+\cs_new_protected:Npn \__pt_tblr_aligned_column_start:n #1
+  {
+    \bool_gset_false:N \g__tblr_colrow_spec_expand_stop_bool
+    \peek_remove_spaces:n
+      {
+        \peek_meaning:NTF \c_group_begin_token
+          { \__pt_tblr_append_fixed_column:nn {#1} }
+          { \__pt_tblr_append_flexible_column:n {#1} }
+      }
+  }
+
+\cs_new_protected:Npn \__pt_tblr_register_aligned_column:nn #1#2
+  {
+    \str_if_in:NnTF \gTblrUsedColumnTypeStr {#1}
+      {
+        \PackageInfo{pt-commons}
+          {Tabularray~column~type~#1~already~exists;~leaving~it~unchanged}
+      }
+      {
+        \cs_if_exist:cTF { tblr_Column_type_#1 }
+          {
+            \PackageWarningNoLine{pt-commons}
+              {Tabularray~column~handler~#1~already~exists~but~is~not~
+               registered;~leaving~it~unchanged}
+          }
+          {
+            \cs_new_protected:cpn { tblr_Column_type_#1 }
+              { \__pt_tblr_aligned_column_start:n {#2} }
+            \str_gput_right:Nn \gTblrUsedColumnTypeStr {#1}
+          }
+      }
+  }
+
+\cs_new_protected:Npn \__pt_tblr_append_x_flexible:
+  {
+    \tl_gput_right:Nn \g__tblr_expanded_colrow_spec_tl
+      { Q[j,t,co=1] }
+    \__tblr_expand_colrow_spec_next:N
+  }
+
+\cs_new_protected:Npn \__pt_tblr_append_x_flexible:n #1
+  {
+    \tl_gput_right:Nn \g__tblr_expanded_colrow_spec_tl
+      { Q[j,t,co=1,#1] }
+    \__tblr_expand_colrow_spec_next:N
+  }
+
+\cs_new_protected:Npn \__pt_tblr_append_x_fixed:n #1
+  {
+    \tl_gput_right:Nn \g__tblr_expanded_colrow_spec_tl
+      { Q[j,t,wd=#1] }
+    \__tblr_expand_colrow_spec_next:N
+  }
+
+\cs_new_protected:Npn \__pt_tblr_append_x_fixed:nn #1#2
+  {
+    \tl_gput_right:Nn \g__tblr_expanded_colrow_spec_tl
+      { Q[j,t,#1,wd=#2] }
+    \__tblr_expand_colrow_spec_next:N
+  }
+
+\bool_if:NTF \l__pt_tblr_parser_api_available_bool
+  {
+    \__pt_tblr_register_aligned_column:nn { L } { l }
+    \__pt_tblr_register_aligned_column:nn { C } { c }
+    \__pt_tblr_register_aligned_column:nn { R } { r }
+
+    \exp_args:Nc \RenewDocumentCommand { tblr_Column_type_X } { o }
+      {
+        \bool_gset_false:N \g__tblr_colrow_spec_expand_stop_bool
+        \IfNoValueTF {#1}
+          {
+            \peek_remove_spaces:n
+              {
+                \peek_meaning:NTF \c_group_begin_token
+                  { \__pt_tblr_append_x_fixed:n }
+                  { \__pt_tblr_append_x_flexible: }
+              }
+          }
+          {
+            \peek_remove_spaces:n
+              {
+                \peek_meaning:NTF \c_group_begin_token
+                  { \__pt_tblr_append_x_fixed:nn {#1} }
+                  { \__pt_tblr_append_x_flexible:n {#1} }
+              }
+          }
+      }
+  }
+  {
+    \PackageError{pt-commons}
+      {Unsupported~Tabularray~column-parser~API}
+      {Use~a~Tabularray~release~supported~by~this~PT~Commons~version.}
+  }
+\ExplSyntaxOff
 
 \NewTableCommand\tableheader{%
     \SetRow{%

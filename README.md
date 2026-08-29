@@ -263,15 +263,29 @@ Regular & \tablecellbold Bold & \tablecellright Right \\
 
 Available table commands are `\tableheader`, `\tablesubheader`,
 `\tablecellleft`, `\tablecellcenter`, `\tablecellright`, `\tablecellbold`, and
-`\tablecellrotated`. Column specifications use Tabularray's native public API:
-`Q[l,t,co=1]`, `Q[c,t,co=1]`, and `Q[r,t,co=1]` provide flexible aligned
-columns; a fixed-width example is `Q[l,t,wd=4cm]`. The native `X` type remains
-available, including forms such as `X[l,wd=4cm]`.
+`\tablecellrotated`. PT Commons provides these column forms as part of its
+public table API:
 
-Version 0.3 removes the former private-API aliases and their global `L`, `C`,
-and `R` names, which could collide with host documents. For example, migrate
-`L{4cm}` to `Q[l,t,wd=4cm]`, `C[2]` to `Q[c,t,co=2]`, and
-`X[l]{4cm}` to `X[l,wd=4cm]`.
+- `L`, `C`, and `R` create flexible top-aligned columns with left, centered,
+  and right-aligned text.
+- `L{4cm}`, `C{4cm}`, and `R{4cm}` create fixed-width aligned columns.
+- `X`, `X[2]`, `X[l]`, and `X[l,wd=4cm]` create flexible or
+  key-configured columns.
+- `X{4cm}` and `X[l]{4cm}` create fixed-width justified or left-aligned
+  columns.
+
+The underlying native `Q` forms are also available:
+`Q[l,t,co=1]` is flexible and `Q[l,t,wd=4cm]` has a fixed width. If a host
+document registers its own `L`, `C`, or `R` type before loading PT Commons,
+that definition is left unchanged.
+
+These forms are the established PT Commons API. Tabularray does not expose a
+public definition operation capable of expressing the optional braced width
+or the complete PT `X` grammar, so the content module keeps the required
+column-parser integration isolated and checks that the parser API is available.
+Run `sh tests/check-table-columns.sh` for the PDFLaTeX contract check, or append
+`xelatex lualatex` to test all three engines. The runner also checks that
+host-defined column types remain untouched.
 
 ## File Trees
 
@@ -337,6 +351,7 @@ empty watermark is ignored. PT Commons scales the result to the page, rotates it
 
 ```latex
 \inlinecode{code}
+\inlinecode{bucket-<normalized-id>}
 \ptinstruction{Review the results.}
 \todayymd
 \twodigits{5}  % 05
