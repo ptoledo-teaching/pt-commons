@@ -7,17 +7,49 @@
 %% License: LaTeX Project Public License 1.3c or later
 %% Created: 2026-08-28
 %% Updated: 2026-08-28
-%% Version: v0.2
+%% Version: v0.3
 %%
 %% This work may be distributed and/or modified under the conditions of the
 %% LaTeX Project Public License, version 1.3c or later.
 %%
 
-\NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{pt-commons-layout}[2026/08/28 v0.2 PT Commons Layout]
+\NeedsTeXFormat{LaTeX2e}[2023-06-01]
+\ProvidesPackage{pt-commons-layout}[2026/08/28 v0.3 PT Commons Layout]
 \makeatletter
 
 % Headers and footers %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Typography and presentation dependencies are intentionally outside core so a
+% host class can opt out of PT's visual defaults.
+\RequirePackage{iftex}
+\ifPDFTeX
+    \RequirePackage[utf8]{inputenc}
+    \RequirePackage[T1]{fontenc}
+\fi
+\@ifpackageloaded{microtype}{}{\RequirePackage[patch=none]{microtype}}
+\RequirePackage{newtxsf}
+\@ifpackageloaded{FiraSans}{}{%
+    \RequirePackage[sfdefault,tabular,scaled=.85]{FiraSans}%
+}
+\RequirePackage{fix-cm}
+\ifPDFTeX
+    \@ifpackageloaded{beramono}{}{\RequirePackage[scaled=0.8]{beramono}}
+\else
+    \@ifpackageloaded{FiraMono}{}{\RequirePackage[scaled=0.8]{FiraMono}}
+\fi
+
+\hypersetup{%
+    linkcolor=ptlightblue,
+    urlcolor=ptlightblue,
+    citecolor=ptlightblue
+}
+
+\@ifclassloaded{beamer}{}{%
+    \captionsetup{%
+        justification=justified,
+        singlelinecheck=true
+    }%
+}
 
 \@ifclassloaded{beamer}{}{%
     \RequirePackage{fancyhdr}
@@ -61,15 +93,6 @@
         }%
     }
     \rfoot{}
-}
-
-% Footnotes %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-\newcommand{\ptfootnoterogue}[1]{%
-    \begingroup
-    \renewcommand\thefootnote{}%
-    \footnotetext{#1}%
-    \endgroup
 }
 
 % Sectioning %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -129,12 +152,6 @@
         parsep=0pt,
         itemsep=0pt
     }
-}
-
-% Text styling %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-\newcommand{\ptinstruction}[1]{%
-    \textcolor{ptred}{\textbf{\pt@labelinstruction} #1}%
 }
 
 % Bulleted list label styles

@@ -7,29 +7,44 @@
 %% License: LaTeX Project Public License 1.3c or later
 %% Created: 2026-08-28
 %% Updated: 2026-08-28
-%% Version: v0.2
+%% Version: v0.3
 %%
 %% This work may be distributed and/or modified under the conditions of the
 %% LaTeX Project Public License, version 1.3c or later.
 %%
 
-\NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{pt-commons-runtime}[2026/08/28 v0.2 PT Commons Runtime]
+\NeedsTeXFormat{LaTeX2e}[2023-06-01]
+\ProvidesPackage{pt-commons-runtime}[2026/08/28 v0.3 PT Commons Runtime]
 \makeatletter
 
 % Build count %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\newread\pt@buildread
-\newwrite\pt@buildfile
-
 \ExplSyntaxOn
+\ior_new:N \g__pt_build_ior
+\iow_new:N \g__pt_build_iow
+\bool_new:N \g__pt_build_count_valid_bool
+\bool_new:N \g__pt_build_fingerprint_available_bool
+\bool_new:N \g__pt_build_state_changed_bool
+\bool_new:N \g__pt_build_state_exists_bool
+\bool_new:N \g__pt_build_stored_fingerprint_valid_bool
+\clist_new:N \l__pt_build_sources_clist
+\tl_new:N \g__pt_build_fingerprint_tl
+\tl_new:N \g__pt_build_state_file_tl
+\tl_new:N \g__pt_build_stored_fingerprint_tl
+\tl_new:N \l__pt_build_fingerprint_material_tl
+\tl_new:N \l__pt_build_state_line_tl
+
 \cs_new_protected:Npn \pt_build_count_invalid:
 {
     \PackageWarningNoLine{pt-commons}
-        {Invalid~build~count~in~`\buildcountfile';~using~0}
-    \def\buildcount{0}
+        {Invalid~build~count~in~`\tl_use:N \g__pt_build_state_file_tl';~using~0}
+    \bool_gset_false:N \g__pt_build_count_valid_bool
+    \cs_gset:Npn \buildcount {0}
 }
-\newcommand{\pt@validatebuildcount}{
+
+\cs_new_protected:Npn \pt_build_count_validate:
+{
+    \bool_gset_true:N \g__pt_build_count_valid_bool
     \tl_set:NV \l_tmpa_tl \buildcount
     \tl_trim_spaces:N \l_tmpa_tl
     \regex_match:nVTF { \A \d+ \Z } \l_tmpa_tl
@@ -37,20 +52,196 @@
             \regex_replace_once:nnN { \A 0+ } { } \l_tmpa_tl
             \tl_if_empty:NT \l_tmpa_tl { \tl_set:Nn \l_tmpa_tl { 0 } }
             \int_compare:nNnTF { \str_count:N \l_tmpa_tl } < { 10 }
-                { \edef\buildcount{\tl_use:N \l_tmpa_tl} }
+                { \cs_gset:Npx \buildcount { \tl_use:N \l_tmpa_tl } }
                 {
                     \int_compare:nNnTF { \str_count:N \l_tmpa_tl } = { 10 }
                         {
                             \str_compare:eNeTF
-                                { \l_tmpa_tl } > { 2147483646 }
+                                { \l_tmpa_tl } > { 2147483647 }
                                 { \pt_build_count_invalid: }
-                                { \edef\buildcount{\tl_use:N \l_tmpa_tl} }
+                                { \cs_gset:Npx \buildcount { \tl_use:N \l_tmpa_tl } }
                         }
                         { \pt_build_count_invalid: }
                 }
         }
         { \pt_build_count_invalid: }
 }
+
+\cs_new_protected:Npn \pt_build_fingerprint_compute:
+{
+    \bool_gset_true:N \g__pt_build_fingerprint_available_bool
+    \tl_clear:N \l__pt_build_fingerprint_material_tl
+    \cs_if_exist:NTF \pt@buildsources
+        { \clist_set:Nx \l__pt_build_sources_clist { \pt@buildsources } }
+        { \clist_set:Nx \l__pt_build_sources_clist { \c_sys_jobname_str .tex } }
+    \clist_if_empty:NT \l__pt_build_sources_clist
+    {
+        \PackageWarningNoLine{pt-commons}
+            {No~build~sources~configured;~automatic~build~count~frozen}
+        \bool_gset_false:N \g__pt_build_fingerprint_available_bool
+    }
+    \clist_map_inline:Nn \l__pt_build_sources_clist
+    {
+        \tl_set:Nn \l_tmpa_tl {##1}
+        \tl_trim_spaces:N \l_tmpa_tl
+        % The hash conditional is engine-dependent for missing paths; make the
+        % existence check explicit before asking for the digest.
+        \file_if_exist:VTF \l_tmpa_tl
+        {
+            \file_get_mdfive_hash:VN \l_tmpa_tl \l_tmpb_tl
+            \tl_put_right:Nx \l__pt_build_fingerprint_material_tl
+                { \tl_to_str:V \l_tmpa_tl = \tl_use:N \l_tmpb_tl ; }
+        }
+        {
+            \PackageWarningNoLine{pt-commons}
+                {Build~source~`\tl_use:N \l_tmpa_tl'~not~found;~automatic~build~count~frozen}
+            \bool_gset_false:N \g__pt_build_fingerprint_available_bool
+        }
+    }
+    \bool_if:NTF \g__pt_build_fingerprint_available_bool
+        {
+            \tl_gset:Nx \g__pt_build_fingerprint_tl
+                { \str_mdfive_hash:V \l__pt_build_fingerprint_material_tl }
+            \tl_gset:Nx \g__pt_build_fingerprint_tl
+                { \str_casefold:V \g__pt_build_fingerprint_tl }
+        }
+        { \tl_gclear:N \g__pt_build_fingerprint_tl }
+}
+
+\cs_new_protected:Npn \pt_build_stored_fingerprint_parse:
+{
+    \bool_gset_false:N \g__pt_build_stored_fingerprint_valid_bool
+    \tl_gclear:N \g__pt_build_stored_fingerprint_tl
+    \regex_match:nVTF
+        {
+            \A [^0-9A-Za-z]* pt-commons-build-state-v1
+            \s+ md5= [0-9A-Fa-f]{32} \s* \Z
+        }
+        \l__pt_build_state_line_tl
+        {
+            \tl_gset_eq:NN
+                \g__pt_build_stored_fingerprint_tl
+                \l__pt_build_state_line_tl
+            \regex_replace_once:nnN
+                { \A .* md5= }
+                { }
+                \g__pt_build_stored_fingerprint_tl
+            \regex_replace_once:nnN
+                { \s* \Z }
+                { }
+                \g__pt_build_stored_fingerprint_tl
+            \tl_gset:Nx \g__pt_build_stored_fingerprint_tl
+                { \str_casefold:V \g__pt_build_stored_fingerprint_tl }
+            \bool_gset_true:N \g__pt_build_stored_fingerprint_valid_bool
+        }
+        {
+            \tl_if_blank:VTF \l__pt_build_state_line_tl
+                { }
+                {
+                    \PackageWarningNoLine{pt-commons}
+                        {Invalid~build~fingerprint~in~`
+                         \tl_use:N \g__pt_build_state_file_tl';~refreshing~it}
+                }
+        }
+}
+
+\cs_new_protected:Npn \pt_build_state_read:
+{
+    \bool_gset_false:N \g__pt_build_state_exists_bool
+    \bool_gset_true:N \g__pt_build_count_valid_bool
+    \cs_gset:Npn \buildcount {0}
+    \tl_clear:N \l__pt_build_state_line_tl
+    \file_if_exist:VTF \g__pt_build_state_file_tl
+    {
+        \bool_gset_true:N \g__pt_build_state_exists_bool
+        \exp_args:NNV \ior_open:Nn
+            \g__pt_build_ior \g__pt_build_state_file_tl
+        \ior_str_get:NNTF \g__pt_build_ior \l_tmpa_tl
+            { \cs_gset:Npx \buildcount { \tl_use:N \l_tmpa_tl } }
+            { \cs_gset:Npn \buildcount { } }
+        \ior_str_get:NNTF \g__pt_build_ior \l__pt_build_state_line_tl
+            { }
+            { \tl_clear:N \l__pt_build_state_line_tl }
+        \ior_close:N \g__pt_build_ior
+        \pt_build_count_validate:
+        \pt_build_stored_fingerprint_parse:
+    }
+    {
+        \bool_gset_false:N \g__pt_build_stored_fingerprint_valid_bool
+        \tl_gclear:N \g__pt_build_stored_fingerprint_tl
+    }
+}
+
+\cs_new_protected:Npn \pt_build_count_increment:
+{
+    \int_compare:nNnTF { \buildcount } < { 2147483647 }
+        { \cs_gset:Npx \buildcount { \int_eval:n { \buildcount + 1 } } }
+        {
+            \PackageWarningNoLine{pt-commons}
+                {Automatic~build~count~has~reached~2147483647;~keeping~the~maximum}
+        }
+}
+
+\cs_new_protected:Npn \pt_build_state_prepare:
+{
+    \tl_gset:Nx \g__pt_build_state_file_tl { \buildcountfile }
+    \bool_gset_false:N \g__pt_build_state_changed_bool
+    \pt_build_state_read:
+    \pt_build_fingerprint_compute:
+    \bool_if:NT \g__pt_build_fingerprint_available_bool
+    {
+        \bool_if:NTF \g__pt_build_state_exists_bool
+        {
+            \bool_if:NTF \g__pt_build_count_valid_bool
+            {
+                \bool_if:NTF \g__pt_build_stored_fingerprint_valid_bool
+                {
+                    \tl_if_eq:NNTF
+                        \g__pt_build_stored_fingerprint_tl
+                        \g__pt_build_fingerprint_tl
+                        { }
+                        {
+                            \pt_build_count_increment:
+                            \bool_gset_true:N \g__pt_build_state_changed_bool
+                        }
+                }
+                {
+                    % Migrate a one-line legacy state without changing its count.
+                    \bool_gset_true:N \g__pt_build_state_changed_bool
+                }
+            }
+            {
+                \cs_gset:Npn \buildcount {0}
+                \bool_gset_true:N \g__pt_build_state_changed_bool
+            }
+        }
+        {
+            % Preserve the historical first automatic build number, B0.
+            \cs_gset:Npn \buildcount {0}
+            \bool_gset_true:N \g__pt_build_state_changed_bool
+        }
+    }
+}
+
+\cs_new_protected:Npn \pt_build_state_write:
+{
+    \bool_if:NT \g__pt_build_state_changed_bool
+    {
+        \exp_args:NNV \iow_open:Nn
+            \g__pt_build_iow \g__pt_build_state_file_tl
+        \iow_now:Nx \g__pt_build_iow { \buildcount }
+        \iow_now:Nx \g__pt_build_iow
+        {
+            \c_percent_str \c_space_tl
+            pt-commons-build-state-v1 \c_space_tl
+            md5=\tl_use:N \g__pt_build_fingerprint_tl
+        }
+        \iow_close:N \g__pt_build_iow
+        \bool_gset_false:N \g__pt_build_state_changed_bool
+    }
+}
+\cs_new_eq:NN \pt@preparebuildstate \pt_build_state_prepare:
+\cs_new_eq:NN \pt@writebuildstate \pt_build_state_write:
 \ExplSyntaxOff
 
 \newcommand{\buildcountfile}{%
@@ -62,27 +253,15 @@
 }
 
 \newcommand{\pt@loadbuildcount}{%
-    \def\buildcount{0}%
     \ifdefined\pt@build
         \ifdefstring{\pt@build}{auto}{%
-            \IfFileExists{\buildcountfile}{%
-                \openin\pt@buildread=\buildcountfile
-                \read\pt@buildread to\buildcount
-                \closein\pt@buildread
-                \ifx\buildcount\empty
-                    \def\buildcount{0}%
-                \fi
-                \pt@validatebuildcount
-            }{}%
+            \pt@preparebuildstate
         }{}%
     \fi
 }
 
 \newcommand{\pt@writebuildcount}{%
-    \immediate\openout\pt@buildfile=\buildcountfile
-    \edef\pt@nextbuildcount{\number\numexpr\buildcount+1\relax}%
-    \immediate\write\pt@buildfile{\pt@nextbuildcount}%
-    \immediate\closeout\pt@buildfile
+    \pt@writebuildstate
 }
 
 % Watermark %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -99,7 +278,10 @@
 
 \newcommand{\setupwatermark}[1]{%
     \begingroup
-    \fontsize{5cm}{6cm}\selectfont
+    % Measure at a standard available size. The former 5cm probe caused font
+    % substitutions in runtime-only documents; 8pt below preserves its 4/5
+    % output scale exactly because text dimensions scale linearly.
+    \fontsize{10pt}{12pt}\selectfont
     \settowidth{\pt@watermarkwidth}{#1}%
     \settoheight{\pt@watermarkheight}{#1}%
     \ifdim\pt@watermarkwidth>\pt@watermarkheight
@@ -117,7 +299,7 @@
             \setlength{\pt@watermarktargetlength}{1.2\paperheight}%
         \fi
         \setlength{\pt@watermarkfinal}{%
-            \dimexpr4cm*\pt@watermarktargetlength/\pt@watermarklength\relax
+            \dimexpr8pt*\pt@watermarktargetlength/\pt@watermarklength\relax
         }%
         \SetWatermarkText{#1}%
         \SetWatermarkFontSize{\pt@watermarkfinal}%
@@ -143,11 +325,6 @@
 
 \AtBeginDocument{%
     \pt@loadbuildcount
-    \hypersetup{%
-        linkcolor=ptlightblue,
-        urlcolor=ptlightblue,
-        citecolor=ptlightblue
-    }%
     \ifdefined\pt@watermark
         \ifdefempty{\pt@watermark}{}{%
             \DraftwatermarkOptions{stamp=true}%
@@ -171,14 +348,9 @@
             }%
         }%
     \fi
-    \sloppy
 }
 
-\AtEndDocument{%
-    \ifdefined\pt@build
-        \ifdefstring{\pt@build}{auto}{\pt@writebuildcount}{}%
-    \fi
-}
+\AtEndDocument{\pt@writebuildcount}
 
 \makeatother
 \endinput

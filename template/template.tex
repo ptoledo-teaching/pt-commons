@@ -39,7 +39,7 @@ The following metadata commands are available:
 
 \begin{itemize}
     \item \inlinecode{\textbackslash version\{1.0\}} - Document version
-    \item \inlinecode{\textbackslash build\{auto\}} - Build number (auto-increments)
+    \item \inlinecode{\textbackslash build\{auto\}} - Build number (advances when a tracked source changes)
     \item \inlinecode{\textbackslash title\{...\}} - Main title
     \item \inlinecode{\textbackslash titlesub\{...\}} - Subtitle
     \item \inlinecode{\textbackslash titlesubsub\{...\}} - Sub-subtitle
@@ -322,7 +322,18 @@ For corporate documents:
 
 \subsection{Build Counter}
 
-The package automatically tracks build numbers when \inlinecode{\textbackslash build\{auto\}} is used. The counter is stored in a file named \texttt{jobname.buildcount} or \texttt{jobnameVERSION.buildcount} if a version is specified.
+The package tracks source revisions when
+\inlinecode{\textbackslash build\{auto\}} is used. The main
+\texttt{jobname.tex} file is tracked by default. Additional inputs can be
+registered one at a time; for example:
+
+\begin{center}
+    \inlinecode{\textbackslash buildsource\{file.tex\}}
+\end{center}
+
+State is stored in \texttt{jobname.buildcount} or
+\texttt{jobnameVERSION.buildcount}, and remains unchanged across ordinary
+reruns.
 
 \subsection{Watermarks}
 
@@ -355,10 +366,10 @@ For more information, visit the project repository or consult the package docume
 
 \begin{itemize}
     \item \textbf{Package}: pt-commons
-    \item \textbf{Version}: 1.1
-    \item \textbf{Date}: 2025/04/21
-    \item \textbf{Author}: PT Teaching
-    \item \textbf{License}: Open Source
+    \item \textbf{Version}: 0.3
+    \item \textbf{Date}: 2026/08/28
+    \item \textbf{Author}: Pedro Toledo Correa
+    \item \textbf{License}: LaTeX Project Public License 1.3c or later
 \end{itemize}
 
 \end{document}

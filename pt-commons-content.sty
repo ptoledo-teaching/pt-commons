@@ -7,14 +7,14 @@
 %% License: LaTeX Project Public License 1.3c or later
 %% Created: 2026-08-28
 %% Updated: 2026-08-28
-%% Version: v0.2
+%% Version: v0.3
 %%
 %% This work may be distributed and/or modified under the conditions of the
 %% LaTeX Project Public License, version 1.3c or later.
 %%
 
-\NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{pt-commons-content}[2026/08/28 v0.2 PT Commons Content]
+\NeedsTeXFormat{LaTeX2e}[2023-06-01]
+\ProvidesPackage{pt-commons-content}[2026/08/28 v0.3 PT Commons Content]
 \makeatletter
 
 % Dependencies %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -22,6 +22,9 @@
 \RequirePackage{colortbl}
 \RequirePackage{dirtree}
 \RequirePackage{fancyvrb}
+\RequirePackage{float}
+\RequirePackage{fontawesome5}
+\RequirePackage{graphicx}
 \RequirePackage{tabularray}
 \RequirePackage{tcolorbox}
 \RequirePackage{totcount}
@@ -117,75 +120,116 @@
 \renewcommand{\DTstyle}{\ttfamily\scriptsize}
 \renewcommand{\DTstylecomment}{\normalfont\footnotesize}
 
-\newcommand{\treeicon}[1]{%
-    \begingroup
-    \newif\if@iconfound
-    \@iconfoundfalse
-    \newcommand{\iconbox}[1]{\makebox[0.25cm][c]{\faIcon[regular]{##1}}}%
-    \def\filename{#1}%
-    % Extract extension.
-    \StrBehind{\filename}{.}[\ext]%
-    % Empty
-    \IfStrEq{\filename}{}{\iconbox{file}\ \@iconfoundtrue}{}%
-    % Archive
-    \IfStrEq{\ext}{zip}{\iconbox{file-archive}\ #1\@iconfoundtrue}{}%
-    \IfStrEq{\ext}{rar}{\iconbox{file-archive}\ #1\@iconfoundtrue}{}%
-    \IfStrEq{\ext}{tar}{\iconbox{file-archive}\ #1\@iconfoundtrue}{}%
-    \IfStrEq{\ext}{gz}{\iconbox{file-archive}\ #1\@iconfoundtrue}{}%
-    \IfStrEq{\ext}{7z}{\iconbox{file-archive}\ #1\@iconfoundtrue}{}%
-    % Audio
-    \IfStrEq{\ext}{mp3}{\iconbox{file-audio}\ #1\@iconfoundtrue}{}%
-    \IfStrEq{\ext}{wav}{\iconbox{file-audio}\ #1\@iconfoundtrue}{}%
-    \IfStrEq{\ext}{ogg}{\iconbox{file-audio}\ #1\@iconfoundtrue}{}%
-    % Code
-    \IfStrEq{\ext}{c}{\iconbox{file-code}\ #1\@iconfoundtrue}{}%
-    \IfStrEq{\ext}{cpp}{\iconbox{file-code}\ #1\@iconfoundtrue}{}%
-    \IfStrEq{\ext}{h}{\iconbox{file-code}\ #1\@iconfoundtrue}{}%
-    \IfStrEq{\ext}{hpp}{\iconbox{file-code}\ #1\@iconfoundtrue}{}%
-    \IfStrEq{\ext}{java}{\iconbox{file-code}\ #1\@iconfoundtrue}{}%
-    \IfStrEq{\ext}{py}{\iconbox{file-code}\ #1\@iconfoundtrue}{}%
-    \IfStrEq{\ext}{js}{\iconbox{file-code}\ #1\@iconfoundtrue}{}%
-    \IfStrEq{\ext}{ts}{\iconbox{file-code}\ #1\@iconfoundtrue}{}%
-    \IfStrEq{\ext}{css}{\iconbox{file-code}\ #1\@iconfoundtrue}{}%
-    \IfStrEq{\ext}{html}{\iconbox{file-code}\ #1\@iconfoundtrue}{}%
-    \IfStrEq{\ext}{xml}{\iconbox{file-code}\ #1\@iconfoundtrue}{}%
-    \IfStrEq{\ext}{json}{\iconbox{file-code}\ #1\@iconfoundtrue}{}%
-    \IfStrEq{\ext}{sh}{\iconbox{file-code}\ #1\@iconfoundtrue}{}%
-    \IfStrEq{\ext}{rb}{\iconbox{file-code}\ #1\@iconfoundtrue}{}%
-    \IfStrEq{\ext}{php}{\iconbox{file-code}\ #1\@iconfoundtrue}{}%
-    \IfStrEq{\ext}{go}{\iconbox{file-code}\ #1\@iconfoundtrue}{}%
-    \IfStrEq{\ext}{rs}{\iconbox{file-code}\ #1\@iconfoundtrue}{}%
-    \IfStrEq{\ext}{tex}{\iconbox{file-code}\ #1\@iconfoundtrue}{}%
-    % Office
-    \IfStrEq{\ext}{xls}{\iconbox{file-excel}\ #1\@iconfoundtrue}{}%
-    \IfStrEq{\ext}{xlsx}{\iconbox{file-excel}\ #1\@iconfoundtrue}{}%
-    \IfStrEq{\ext}{doc}{\iconbox{file-word}\ #1\@iconfoundtrue}{}%
-    \IfStrEq{\ext}{docx}{\iconbox{file-word}\ #1\@iconfoundtrue}{}%
-    \IfStrEq{\ext}{ppt}{\iconbox{file-powerpoint}\ #1\@iconfoundtrue}{}%
-    \IfStrEq{\ext}{pptx}{\iconbox{file-powerpoint}\ #1\@iconfoundtrue}{}%
-    % Image
-    \IfStrEq{\ext}{jpg}{\iconbox{file-image}\ #1\@iconfoundtrue}{}%
-    \IfStrEq{\ext}{jpeg}{\iconbox{file-image}\ #1\@iconfoundtrue}{}%
-    \IfStrEq{\ext}{png}{\iconbox{file-image}\ #1\@iconfoundtrue}{}%
-    \IfStrEq{\ext}{gif}{\iconbox{file-image}\ #1\@iconfoundtrue}{}%
-    \IfStrEq{\ext}{svg}{\iconbox{file-image}\ #1\@iconfoundtrue}{}%
-    % PDF
-    \IfStrEq{\ext}{pdf}{\iconbox{file-pdf}\ #1\@iconfoundtrue}{}%
-    % Video
-    \IfStrEq{\ext}{mp4}{\iconbox{file-video}\ #1\@iconfoundtrue}{}%
-    \IfStrEq{\ext}{avi}{\iconbox{file-video}\ #1\@iconfoundtrue}{}%
-    \IfStrEq{\ext}{mov}{\iconbox{file-video}\ #1\@iconfoundtrue}{}%
-    \IfStrEq{\ext}{mkv}{\iconbox{file-video}\ #1\@iconfoundtrue}{}%
-    % Default
-    \if@iconfound\else
-        \IfStrEq{\ext}{}{\iconbox{folder-open}\ #1}{\iconbox{file}\ #1}%
-    \fi
-    \endgroup
-}
+\ExplSyntaxOn
+\prop_const_from_keyval:Nn \c__pt_tree_icons_prop
+  {
+    .zip=file-archive, .rar=file-archive, .tar=file-archive,
+    .gz=file-archive, .7z=file-archive,
+    .mp3=file-audio, .wav=file-audio, .ogg=file-audio,
+    .c=file-code, .cpp=file-code, .h=file-code, .hpp=file-code,
+    .java=file-code, .py=file-code, .js=file-code, .ts=file-code,
+    .css=file-code, .html=file-code, .xml=file-code, .json=file-code,
+    .sh=file-code, .rb=file-code, .php=file-code, .go=file-code,
+    .rs=file-code, .tex=file-code,
+    .xls=file-excel, .xlsx=file-excel,
+    .doc=file-word, .docx=file-word,
+    .ppt=file-powerpoint, .pptx=file-powerpoint,
+    .jpg=file-image, .jpeg=file-image, .png=file-image,
+    .gif=file-image, .svg=file-image,
+    .pdf=file-pdf,
+    .mp4=file-video, .avi=file-video, .mov=file-video, .mkv=file-video
+  }
+\str_new:N \l__pt_tree_input_str
+\str_new:N \l__pt_tree_selector_str
+\str_new:N \l__pt_tree_directory_str
+\str_new:N \l__pt_tree_name_str
+\str_new:N \l__pt_tree_extension_str
+\tl_new:N \l__pt_tree_expanded_input_tl
+\tl_new:N \l__pt_tree_icon_tl
 
-\newcommand{\treeiconfirst}[1]{%
-    \hspace{0.1cm}\treeicon{#1}%
-}
+\cs_new_protected:Npn \pt_tree_select_file_icon:
+  {
+    % A dotfile has an empty base name; never interpret its full name as a
+    % known extension (for example, `.pdf' is still a generic file).
+    \str_if_empty:NTF \l__pt_tree_name_str
+      { \tl_set:Nn \l__pt_tree_icon_tl { file } }
+      {
+        \prop_get:NVNTF
+          \c__pt_tree_icons_prop
+          \l__pt_tree_extension_str
+          \l__pt_tree_icon_tl
+          { }
+          { \tl_set:Nn \l__pt_tree_icon_tl { file } }
+      }
+  }
+
+\cs_new_protected:Npn \pt_tree_select_auto_icon:
+  {
+    \str_if_empty:NTF \l__pt_tree_input_str
+      { \tl_set:Nn \l__pt_tree_icon_tl { file } }
+      {
+        \str_case:VnF \l__pt_tree_input_str
+          {
+            {.}{\tl_set:Nn \l__pt_tree_icon_tl { folder-open }}
+            {..}{\tl_set:Nn \l__pt_tree_icon_tl { folder-open }}
+          }
+          {
+            \str_if_empty:NTF \l__pt_tree_extension_str
+              {
+                \str_if_empty:NTF \l__pt_tree_name_str
+                  {
+                    \str_if_empty:NTF \l__pt_tree_directory_str
+                      { \tl_set:Nn \l__pt_tree_icon_tl { file } }
+                      { \tl_set:Nn \l__pt_tree_icon_tl { folder-open } }
+                  }
+                  { \tl_set:Nn \l__pt_tree_icon_tl { folder-open } }
+              }
+              { \pt_tree_select_file_icon: }
+          }
+      }
+  }
+
+\cs_new_protected:Npn \pt_tree_select_icon:nn #1#2
+  {
+    \tl_set:Nx \l__pt_tree_expanded_input_tl {#2}
+    \str_set:Nx \l__pt_tree_input_str
+      { \tl_to_str:V \l__pt_tree_expanded_input_tl }
+    \str_set:Nx \l__pt_tree_selector_str { \str_casefold:n {#1} }
+    \file_parse_full_name:VNNN
+      \l__pt_tree_input_str
+      \l__pt_tree_directory_str
+      \l__pt_tree_name_str
+      \l__pt_tree_extension_str
+    \str_set:Nx \l__pt_tree_extension_str
+      { \str_casefold:V \l__pt_tree_extension_str }
+    \str_case:VnF \l__pt_tree_selector_str
+      {
+        {auto}{\pt_tree_select_auto_icon:}
+        {file}{\pt_tree_select_file_icon:}
+        {folder}{\tl_set:Nn \l__pt_tree_icon_tl { folder-open }}
+      }
+      {
+        \PackageWarningNoLine{pt-commons}
+          {Unknown tree icon selector `#1'; using `auto'}
+        \pt_tree_select_auto_icon:
+      }
+  }
+
+\cs_new_protected:Npn \pt_tree_icon_box:n #1
+  { \makebox[0.25cm][c]{\faIcon[regular]{#1}} }
+
+\NewDocumentCommand{\treeicon}{O{auto}m}
+  {
+    \group_begin:
+    \pt_tree_select_icon:nn {#1} {#2}
+    \exp_args:NV \pt_tree_icon_box:n \l__pt_tree_icon_tl
+    \tl_if_blank:nF {#2} {\ #2}
+    \group_end:
+  }
+
+\NewDocumentCommand{\treeiconfirst}{O{auto}m}
+  { \hspace{0.1cm}\treeicon[#1]{#2} }
+\ExplSyntaxOff
 
 % Use a dedicated auxiliary extension so file-tree captions do not leak into
 % the list of figures.
@@ -202,16 +246,21 @@
 % Graphics %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \RequirePackage{tikz}
-\usetikzlibrary{fadings}
-\tikzfading[
-    name=title page picture fading,
-    left color=transparent!0,
-    right color=transparent!100,
-]
 
 \RequirePackage{pgfplots}
 \usepgfplotslibrary{groupplots}
 \pgfplotsset{compat=1.18}
+
+\ExplSyntaxOn
+\cs_new_protected:Npn \pt_figure_label:n #1
+  {
+    \tl_set:Nx \l_tmpa_tl {#1}
+    \regex_match:nVTF { \A fig: } \l_tmpa_tl
+      { \label{#1} }
+      { \label{fig:#1} }
+  }
+\cs_new_eq:NN \pt@figurelabel \pt_figure_label:n
+\ExplSyntaxOff
 
 \newcommand{\ptfigure}[5]{%
     % 1: Position (h, t, b, p)
@@ -223,7 +272,7 @@
         \centering
         \includegraphics[#2]{#3}
         \caption{#4}
-        \IfBeginWith{#5}{fig:}{\label{#5}}{\label{fig:#5}}%
+        \pt@figurelabel{#5}%
     \end{figure}%
 }
 
@@ -236,39 +285,9 @@
 \SetTblrInner{colsep=3pt}
 \SetTblrInner{width=\columnwidth}
 
-\ExplSyntaxOn
-\cs_new_protected:Npn \pt_tblr_new_auto_width_column_type:nn #1 #2
-{
-    \exp_args:Nc \NewDocumentCommand { tblr_Column_type_ #1 } { g }
-    {
-        \bool_gset_false:N \g__tblr_colrow_spec_expand_stop_bool
-        \IfNoValueTF {##1}
-        { \tl_gput_right:Nn \g__tblr_expanded_colrow_spec_tl { Q[#2,t,co=1] } }
-        { \tl_gput_right:Nn \g__tblr_expanded_colrow_spec_tl { Q[#2,t,wd=##1] } }
-        \__tblr_expand_colrow_spec_next:N
-    }
-    \str_gput_right:Nn \gTblrUsedColumnTypeStr {#1}
-}
-\pt_tblr_new_auto_width_column_type:nn { L } { l }
-\pt_tblr_new_auto_width_column_type:nn { C } { c }
-\pt_tblr_new_auto_width_column_type:nn { R } { r }
-\exp_args:Nc \RenewDocumentCommand { tblr_Column_type_ X } { o g }
-{
-    \bool_gset_false:N \g__tblr_colrow_spec_expand_stop_bool
-    \IfNoValueTF {#2}
-    {
-        \IfNoValueTF {#1}
-        { \tl_gput_right:Nn \g__tblr_expanded_colrow_spec_tl { Q[j,t,co=1] } }
-        { \tl_gput_right:Nn \g__tblr_expanded_colrow_spec_tl { Q[j,t,co=1,#1] } }
-    }
-    {
-        \IfNoValueTF {#1}
-        { \tl_gput_right:Nn \g__tblr_expanded_colrow_spec_tl { Q[j,t,wd=#2] } }
-        { \tl_gput_right:Nn \g__tblr_expanded_colrow_spec_tl { Q[j,t,#1,wd=#2] } }
-    }
-    \__tblr_expand_colrow_spec_next:N
-}
-\ExplSyntaxOff
+% Do not reserve generic global column names such as L, C, or R. Tabularray's
+% public API has no provide/renew operation, so aliases here would conflict
+% with host documents. Use its native Q and X specifications directly.
 
 \NewTableCommand\tableheader{%
     \SetRow{%

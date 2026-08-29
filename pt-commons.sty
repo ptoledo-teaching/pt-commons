@@ -7,7 +7,7 @@
 %% License: LaTeX Project Public License 1.3c or later
 %% Created: 2024-07-10
 %% Updated: 2026-08-28
-%% Version: v0.2
+%% Version: v0.3
 %%
 %% -----------------------------------------------------------------
 %% This work may be distributed and/or modified under
@@ -17,30 +17,76 @@
 %% -----------------------------------------------------------------
 %%
 
-\NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{pt-commons}[2026/08/28 v0.2 PT Commons Package]
+\NeedsTeXFormat{LaTeX2e}[2023-06-01]
+\ProvidesPackage{pt-commons}[2026/08/28 v0.3 PT Commons Package]
 \makeatletter
 
 % Package options %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \newif\ifpt@useminted
 \pt@usemintedtrue
+\newif\ifpt@loadlayout
+\newif\ifpt@loadcontent
+\newif\ifpt@loadruntime
+\pt@loadlayouttrue
+\pt@loadcontenttrue
+\pt@loadruntimetrue
 \newcommand{\pt@language}{spanish}
+
+\newcommand{\pt@coreonly}{%
+    \pt@loadlayoutfalse
+    \pt@loadcontentfalse
+    \pt@loadruntimefalse
+}
+\newcommand{\pt@full}{%
+    \pt@loadlayouttrue
+    \pt@loadcontenttrue
+    \pt@loadruntimetrue
+}
 
 \DeclareOption{spanish}{\renewcommand\pt@language{spanish}}
 \DeclareOption{english}{\renewcommand\pt@language{english}}
 \DeclareOption{portuguese}{\renewcommand\pt@language{portuguese}}
 \DeclareOption{french}{\renewcommand\pt@language{french}}
 \DeclareOption{nominted}{\pt@usemintedfalse}
-\ProcessOptions\relax
+\DeclareOption{coreonly}{\pt@coreonly}
+\DeclareOption{minimal}{\pt@coreonly}
+\DeclareOption{full}{\pt@full}
+\DeclareOption{layout}{\pt@loadlayouttrue}
+\DeclareOption{nolayout}{\pt@loadlayoutfalse}
+\DeclareOption{content}{\pt@loadcontenttrue}
+\DeclareOption{nocontent}{\pt@loadcontentfalse}
+\DeclareOption{runtime}{\pt@loadruntimetrue}
+\DeclareOption{noruntime}{\pt@loadruntimefalse}
+% The starred form preserves the order written by the user. This is required
+% for compositions such as [coreonly,content] and [full,noruntime].
+\ProcessOptions*\relax
 
 \makeatother
 
-% Internal modules. Their order is part of the package implementation:
-% core definitions, shared layout, content helpers, then deferred runtime hooks.
+% Core is mandatory. The remaining internal modules are enabled by default and
+% can be disabled independently for lightweight or host-controlled documents.
 \RequirePackage{pt-commons-core}
-\RequirePackage{pt-commons-layout}
-\RequirePackage{pt-commons-content}
-\RequirePackage{pt-commons-runtime}
+\makeatletter
+\ifpt@loadlayout
+    \RequirePackage{pt-commons-layout}
+\fi
+\ifpt@loadcontent
+    \RequirePackage{pt-commons-content}
+\fi
+\ifpt@loadruntime
+    \RequirePackage{pt-commons-runtime}
+\else
+    \AtBeginDocument{%
+        \ifdefined\pt@build
+            \ifdefstring{\pt@build}{auto}{%
+                \PackageWarningNoLine{pt-commons}{%
+                    Automatic build counting is disabled by the noruntime option%
+                }%
+            }{}%
+        \fi
+    }%
+\fi
+\makeatother
 
 \endinput

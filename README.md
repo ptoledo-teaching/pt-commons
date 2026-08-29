@@ -1,10 +1,10 @@
 # PT Commons Package
 
-**Version:** 0.2<br>
+**Version:** 0.3<br>
 **Date:** 2026/08/28<br>
 **Author:** Pedro Toledo Correa<br>
 **License:** LaTeX Project Public License 1.3c or later<br>
-**Repository:** [GitHub - pt-latex/pt-commons](https://github.com/ptoledo-teaching/pt-commons)
+**Repository:** [GitHub - ptoledo-teaching/pt-commons](https://github.com/ptoledo-teaching/pt-commons)
 
 PT Commons provides the shared commands, styles, and runtime helpers used by the
 PT document class family (`pt-article`, `pt-report`, `pt-slides`, and
@@ -30,8 +30,8 @@ internal modules:
 | File | Responsibility |
 | --- | --- |
 | `pt-commons.sty` | Public package, options, and module loading order |
-| `pt-commons-core.sty` | Dependencies, metadata, languages, links, authors, and colors |
-| `pt-commons-layout.sty` | Headers, footers, sections, lists, and text styles |
+| `pt-commons-core.sty` | Metadata, languages, links, authors, colors, and semantic commands |
+| `pt-commons-layout.sty` | Typography, headers, footers, sections, lists, and visual defaults |
 | `pt-commons-content.sty` | Tables, figures, file trees, plots, and code blocks |
 | `pt-commons-runtime.sty` | Build metadata, watermarks, and document hooks |
 
@@ -84,6 +84,29 @@ PT classes.
 
 The package also follows later `\selectlanguage{...}` changes.
 
+### Module Loading
+
+The default remains the complete package. Advanced documents and host classes
+can disable the optional modules independently:
+
+```latex
+\usepackage[coreonly]{pt-commons}              % Core only
+\usepackage[nolayout]{pt-commons}              % Core + content + runtime
+\usepackage[nocontent]{pt-commons}             % Core + layout + runtime
+\usepackage[noruntime]{pt-commons}             % Core + layout + content
+\usepackage[coreonly,content]{pt-commons}      % Core + content
+```
+
+`minimal` is an alias for `coreonly`; `full` restores all modules. The positive
+options `layout`, `content`, and `runtime` can be combined after `coreonly`.
+Options are applied from left to right. The PT classes forward these options,
+while keeping the packages required by their own class implementation.
+
+Core-only mode retains metadata, languages, authors, colors, links,
+`\ptinstruction`, and caption helpers. It does not load PT typography, table and
+graphics helpers, Minted, TikZ/PGFPlots, file trees, watermarks, or persistent
+build state.
+
 ### Code Environment
 
 Minted is enabled by default:
@@ -121,26 +144,33 @@ Metadata setters may be called more than once; the last value is used.
 
 ```latex
 \version{1.0}
-\build{auto}   % Persistent automatic build number
+\build{auto}   % Source-revision build number
+\buildsource{chapter-1.tex}  % Also track an included source
 \build{42}     % Fixed build number
 \docversion    % Prints v1.0, or NA if no version was set
 ```
 
 Automatic mode stores its state in a job- and version-specific `*.buildcount`
 file. No build-count file is read or written when `\build` is omitted or a
-manual build value is used. The automatic value advances once per TeX engine
-pass.
+manual build value is used.
 
-Because `*.buildcount` is both read and rewritten, Latexmk must ignore changes
-to that file when deciding whether another pass is necessary. Add this rule to
-the project's `latexmkrc`:
+`\build{auto}` is a source-revision counter: it advances when the fingerprint
+of a tracked source changes, not on every TeX pass. The default tracked source
+is `\jobname.tex`. Add included files, bibliography files, or other inputs with
+repeatable `\buildsource{...}` calls; the main source remains tracked. Use
+`\buildsources{file-a.tex,file-b.tex}` to replace the complete list instead.
+The order of that list is significant.
 
-```perl
-$hash_calc_ignore_pattern{'buildcount'} = '^';
-```
+When the engine is invoked with `-jobname`, or the main source is outside the
+current working directory, `\jobname.tex` may not be its actual path. In that
+case, set the complete list explicitly with `\buildsources{path/main.tex,...}`.
 
-Without the rule, `\build{auto}` can keep Latexmk running until its maximum
-number of passes. A fixed `\build{...}` value needs no special configuration.
+A new state starts at B0. Existing one-line state files are migrated without
+changing their number. If a tracked source cannot be found, the current number
+is frozen and a warning explains which source must be corrected. The state is
+rewritten only when its fingerprint changes, so Latexmk converges normally and
+no `latexmkrc` ignore rule is required. Avoid concurrent compilations that
+share the same job name and state file.
 
 ### Title
 
@@ -233,8 +263,15 @@ Regular & \tablecellbold Bold & \tablecellright Right \\
 
 Available table commands are `\tableheader`, `\tablesubheader`,
 `\tablecellleft`, `\tablecellcenter`, `\tablecellright`, `\tablecellbold`, and
-`\tablecellrotated`. The `L`, `C`, `R`, and `X` column types accept either
-automatic width or an explicit braced width, such as `L{4cm}`.
+`\tablecellrotated`. Column specifications use Tabularray's native public API:
+`Q[l,t,co=1]`, `Q[c,t,co=1]`, and `Q[r,t,co=1]` provide flexible aligned
+columns; a fixed-width example is `Q[l,t,wd=4cm]`. The native `X` type remains
+available, including forms such as `X[l,wd=4cm]`.
+
+Version 0.3 removes the former private-API aliases and their global `L`, `C`,
+and `R` names, which could collide with host documents. For example, migrate
+`L{4cm}` to `Q[l,t,wd=4cm]`, `C[2]` to `Q[c,t,co=2]`, and
+`X[l]{4cm}` to `X[l,wd=4cm]`.
 
 ## File Trees
 
@@ -253,8 +290,13 @@ automatic width or an explicit braced width, such as `L{4cm}`.
 ```
 
 Known archive, audio, code, office, image, PDF, and video extensions receive a
-matching Font Awesome icon. File-tree captions use their own auxiliary list and
-therefore do not appear in the list of figures.
+matching Font Awesome icon. Extension matching is case-insensitive and uses the
+last suffix, so names such as `archive.tar.GZ` work. A trailing `/` denotes a
+folder. Extensionless names preserve the historical folder heuristic; use
+`\treeicon[file]{LICENSE}` or `\treeicon[folder]{dir.v1}` to resolve ambiguous
+names explicitly. The same optional selector is available on `\treeiconfirst`.
+File-tree captions use their own auxiliary list and therefore do not appear in
+the list of figures.
 
 ## Lists of Contents
 
@@ -323,15 +365,20 @@ forms.
 
 ## Dependencies
 
-Required packages include:
+PT Commons requires LaTeX 2023-06-01 or newer.
 
-- `adjustbox`, `babel`, `caption` or `capt-of`, `colortbl`, `dirtree`
-- `draftwatermark`, `enumitem`, `etoolbox`, `expl3`, `fancyhdr`, `fancyvrb`
-- `FiraSans`, `FiraMono` or `beramono`, `fix-cm`, `float`, `fontawesome5`, `geometry`, `graphicx`, `hyperref`, `iftex`
-- `letltxmacro`, `microtype`, `newtxsf`, `pgfplots`, `ragged2e`
-- `tabularray`, `tcolorbox`, `textpos`, `tikz`, `titlesec`, `totcount`, `xcolor`, `xstring`
+Dependencies are scoped by module:
 
-Class-sensitive packages are loaded only where applicable. `minted` is optional.
+- Core: `babel`, `caption` or `capt-of`, `etoolbox`, `expl3`, `hyperref`,
+  `letltxmacro`, and `xcolor`.
+- Layout: `enumitem`, `fancyhdr`, `iftex`, `microtype`, `newtxsf`, `titlesec`,
+  Fira Sans, and Bera Mono or Fira Mono.
+- Content: `colortbl`, `dirtree`, `fancyvrb`, `float`, `fontawesome5`,
+  `graphicx`, `pgfplots`, `tabularray`, `tcolorbox`, `tikz`, and `totcount`.
+- Runtime: `draftwatermark`.
+
+Class-sensitive packages are loaded only where applicable. `minted` is optional
+and belongs to the content module.
 
 The configured text font is Fira Sans (scaled to 0.85). The monospaced font is
 Bera Mono under PDFLaTeX and Fira Mono under XeLaTeX or LuaLaTeX, scaled to 0.8.

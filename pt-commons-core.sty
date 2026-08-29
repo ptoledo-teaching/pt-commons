@@ -7,43 +7,27 @@
 %% License: LaTeX Project Public License 1.3c or later
 %% Created: 2026-08-28
 %% Updated: 2026-08-28
-%% Version: v0.2
+%% Version: v0.3
 %%
 %% This work may be distributed and/or modified under the conditions of the
 %% LaTeX Project Public License, version 1.3c or later.
 %%
 
-\NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{pt-commons-core}[2026/08/28 v0.2 PT Commons Core]
+\NeedsTeXFormat{LaTeX2e}[2023-06-01]
+\ProvidesPackage{pt-commons-core}[2026/08/28 v0.3 PT Commons Core]
 \makeatletter
 
 % Shared dependencies %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% Some PT classes use these packages transitively. Keep them in the facade's
-% mandatory core until the classes declare their own dependencies.
-\RequirePackage{adjustbox}
 \RequirePackage{etoolbox}
 \RequirePackage{expl3}
-\RequirePackage{float}
-\RequirePackage{fontawesome5}
-\RequirePackage{graphicx}
 \RequirePackage{letltxmacro}
-\@ifpackageloaded{microtype}{}{\RequirePackage[patch=none]{microtype}}
-\RequirePackage{newtxsf}
-\RequirePackage{ragged2e}
-\@ifpackageloaded{textpos}{}{\RequirePackage[absolute,overlay]{textpos}}
 \RequirePackage{xcolor}
-\RequirePackage{xstring}
 
 \@ifclassloaded{beamer}{%
     \RequirePackage{capt-of}%
 }{%
-    \RequirePackage{geometry} % Geometry conflicts with beamer.
     \@ifpackageloaded{caption}{}{\RequirePackage[hypcap=false]{caption}}%
-    \captionsetup{%
-        justification=justified,%
-        singlelinecheck=true%
-    }%
 }%
 
 % Caption helpers are available with every supported class.
@@ -92,6 +76,17 @@
 % Metadata setters remain reusable so callers can override an earlier value.
 \newcommand{\version}[1]{\gdef\pt@version{#1}}
 \newcommand{\build}[1]{\gdef\pt@build{#1}}
+\newcommand{\buildsources}[1]{\gdef\pt@buildsources{#1}}
+\newcommand{\buildsource}[1]{%
+    \ifdefined\pt@buildsources
+        \gappto\pt@buildsources{,#1}%
+    \else
+        % The singular command adds to the default source set; only the plural
+        % \buildsources command replaces it completely.
+        \gdef\pt@buildsources{\jobname.tex,#1}%
+    \fi
+}
+\providecommand{\buildcount}{0}
 \newcommand{\docversion}{%
     \ifdefined\pt@version%
         \ifdefempty{\pt@version}{NA}{v\pt@version}%
@@ -147,25 +142,6 @@
 \newcommand{\corporation}[1]{\gdef\pt@corporation{#1}}
 \newcommand{\corporationdepartment}[1]{\gdef\pt@corporationdepartment{#1}}
 
-% Fonts and encoding %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-\RequirePackage{iftex}
-\ifPDFTeX
-    \RequirePackage[utf8]{inputenc}
-    \RequirePackage[T1]{fontenc}
-\fi
-\@ifpackageloaded{FiraSans}{}{%
-    \RequirePackage[sfdefault,tabular,scaled=.85]{FiraSans}%
-}
-\RequirePackage{fix-cm}
-\ifPDFTeX
-    \@ifpackageloaded{beramono}{}{\RequirePackage[scaled=0.8]{beramono}}
-\else
-    % Bera Mono has no TU encoding. Fira Mono provides native OpenType fonts
-    % for XeLaTeX and LuaLaTeX and avoids an implicit proportional fallback.
-    \@ifpackageloaded{FiraMono}{}{\RequirePackage[scaled=0.8]{FiraMono}}
-\fi
-
 % Colors %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \definecolor{ptred}{HTML}{D60019}
@@ -204,6 +180,17 @@
     \renewrobustcmd{\ref}{\@ifstar\pt@ref@star\pt@ref@regular}%
     \LetLtxMacro\autorefregular\autoref
     \renewrobustcmd{\autoref}{\@ifstar\pt@autoref@star\pt@autoref@regular}%
+}
+
+% Semantic text helpers belong to core and remain available in core-only mode.
+\newcommand{\ptinstruction}[1]{%
+    \textcolor{ptred}{\textbf{\pt@labelinstruction} #1}%
+}
+\newcommand{\ptfootnoterogue}[1]{%
+    \begingroup
+    \renewcommand\thefootnote{}%
+    \footnotetext{#1}%
+    \endgroup
 }
 
 % Language %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
