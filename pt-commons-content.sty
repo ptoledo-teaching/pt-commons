@@ -278,6 +278,19 @@
 
 % Tables %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+% A center environment inside a table float is only an alignment wrapper.  Its
+% list spacing would otherwise be added to the normal caption skip, unlike the
+% declaration-style \centering convention used by figures.
+\newcommand{\pt@normalizetablecenter}{%
+    \@ifundefined{@captype}{}{%
+        \ifdefstring{\@captype}{table}{%
+            \setlength{\topsep}{0pt}%
+            \setlength{\partopsep}{0pt}%
+        }{}%
+    }%
+}
+\AddToHook{env/center/begin}{\pt@normalizetablecenter}
+
 % Center tables in a local group so the declaration cannot affect later text.
 \BeforeBeginEnvironment{tblr}{\begingroup\centering}
 \AfterEndEnvironment{tblr}{\endgroup}
@@ -455,6 +468,9 @@
         showspaces=false,
         vspace=0.25cm
     }
+    % A listing float already supplies the same caption separation as figure
+    % and table floats.  Suppress Minted's additional display spacing locally.
+    \AddToHook{env/listing/begin}{\setminted{vspace=0pt}}
     \newenvironment{ptprintcode}[1]{%
         \VerbatimEnvironment
         \begin{minted}[%
