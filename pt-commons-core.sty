@@ -420,9 +420,14 @@
 \newcommand{\titleauthorsboxes}{%
     \begingroup
     \addtolength{\pt@author@minipagelength}{3pt}%
+    \ifdim\pt@author@minipagelength>\linewidth
+        \setlength{\pt@author@minipagelength}{\linewidth}%
+    \fi
     \count1=1%
     \loop
         \ifnum\count1<\numexpr\value{authorindex}+1\relax
+        % Permit a new line between author boxes when the row is full.
+        \ifnum\count1>1 \hspace{0pt}\fi
         \begin{minipage}{\pt@author@minipagelength}
             \centering
             \csname authornamefull\the\count1\endcsname
