@@ -6,15 +6,15 @@
 %% Repo: https://github.com/ptoledo-teaching/pt-commons
 %% License: LaTeX Project Public License 1.3c or later
 %% Created: 2026-08-28
-%% Updated: 2026-08-29
-%% Version: v0.4
+%% Updated: 2026-10-23
+%% Version: v0.5
 %%
 %% This work may be distributed and/or modified under the conditions of the
 %% LaTeX Project Public License, version 1.3c or later.
 %%
 
 \NeedsTeXFormat{LaTeX2e}[2023-06-01]
-\ProvidesPackage{pt-commons-core}[2026/08/29 v0.4 PT Commons Core]
+\ProvidesPackage{pt-commons-core}[2026/10/23 v0.5 PT Commons Core]
 \makeatletter
 
 % Shared dependencies %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -329,6 +329,49 @@
 % Public access to the localized strings shared by PT host classes. The key
 % names are toc, questions, instruction, backgroundsource, and templatecredit.
 \newcommand{\ptlabel}[1]{\csuse{pt@label#1}}
+
+% Select user-supplied text using Babel's active language; never infer a translation.
+\ExplSyntaxOn
+\prop_new:N \l__pt_text_translations_prop
+\tl_new:N \l__pt_text_language_tl
+\tl_new:N \l__pt_text_value_tl
+\cs_generate_variant:Nn \prop_get:NnNTF { NV }
+\cs_new_protected:Npn \__pt_text_language:n #1
+  {
+    \str_case:nnF {#1} {{spanish}{} {english}{} {portuguese}{} {french}{}}
+      {\PackageError{pt-commons}{Unsupported~language~'#1'}{Use~spanish,~english,~portuguese~or~french.}}
+  }
+\cs_new_protected:Npn \__pt_text_put:nn #1#2
+  {
+    \__pt_text_language:n {#1}
+    \prop_if_in:NnTF \l__pt_text_translations_prop {#1}
+      {\PackageError{pt-commons}{Duplicate~translation~'#1'}{Define~each~language~once.}}
+      {\prop_put:Nnn \l__pt_text_translations_prop {#1}{#2}}
+  }
+\cs_new_protected:Npn \__pt_text_valueless:n #1
+  {
+    \__pt_text_language:n {#1}
+    \PackageError{pt-commons}{Missing~translation~value~for~'#1'}{Use~language={text}~for~each~translation.}
+  }
+\cs_new_protected:Npn \__pt_text_missing:n #1
+  {\PackageError{pt-commons}{Missing~inline~translation~'#1'}{Provide~a~nonempty~translation~for~the~active~language.~No~fallback~is~used.}}
+\NewDocumentCommand \pttext {+m}
+  {
+    \group_begin:
+    \prop_clear:N \l__pt_text_translations_prop
+    \keyval_parse:NNn \__pt_text_valueless:n \__pt_text_put:nn {#1}
+    \tl_set:Nx \l__pt_text_language_tl {\languagename}
+    \exp_args:NV \__pt_text_language:n \l__pt_text_language_tl
+    \prop_get:NVNTF \l__pt_text_translations_prop \l__pt_text_language_tl \l__pt_text_value_tl
+      {
+        \tl_if_blank:VTF \l__pt_text_value_tl
+          {\__pt_text_missing:n {\l__pt_text_language_tl}}
+          {\tl_use:N \l__pt_text_value_tl}
+      }
+      {\__pt_text_missing:n {\l__pt_text_language_tl}}
+    \group_end:
+  }
+\ExplSyntaxOff
 
 % Authors %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

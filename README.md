@@ -1,7 +1,7 @@
 # PT Commons Package
 
-**Version:** 0.4<br>
-**Date:** 2026/08/29<br>
+**Version:** 0.5<br>
+**Date:** 2026/10/23<br>
 **Author:** Pedro Toledo Correa<br>
 **License:** LaTeX Project Public License 1.3c or later<br>
 **Repository:** [GitHub - ptoledo-teaching/pt-commons](https://github.com/ptoledo-teaching/pt-commons)
@@ -13,6 +13,7 @@ PT document class family (`pt-article`, `pt-report`, `pt-slides`, and
 ## Features
 
 - Multi-language support: Spanish (default), English, Portuguese, and French
+- Explicit localized text with `\pttext`, selected from the active Babel language
 - Reusable document, institution, class, and corporate metadata
 - Multiple-author formatting with optional email and affiliation information
 - Shared PT colors, typography, headers, footers, lists, and section styles
@@ -106,6 +107,28 @@ PT classes.
 ```
 
 The package also follows later `\selectlanguage{...}` changes.
+
+### Localized Text
+
+`\pttext{language={text},...}` selects user-supplied text using Babel's active language at the point of use. It belongs to the mandatory core, so it is available with `coreonly` and in any host class that loads Commons.
+
+```latex
+\documentclass{article}
+\usepackage[coreonly,spanish]{pt-commons}
+\babelprovide[import]{english}
+\begin{document}
+\pttext{spanish={Experiencia},english={Experience}}
+{\selectlanguage{english}\pttext{spanish={Actualidad},english={Present}}}
+\end{document}
+```
+
+The identifiers are `spanish`, `english`, `portuguese` and `french`. Load additional Babel locales before switching to them. Only the selected value is evaluated; unused values may contain commands that are undefined in the active context. Values can include formatting, links, nested `\pttext` calls and paragraphs. Use braces around values containing commas.
+
+A missing or blank selected translation raises a package error. Unknown language identifiers, duplicate translations and keys without `=value` are errors even in unselected branches. Unselected blank values are allowed. There is no automatic translation, language inference or fallback; the active document language must have an explicit nonblank value.
+
+`\pttext` is a protected typesetting command, not an expandable string selector. In PDF metadata or bookmarks, supply the PDF text explicitly, for example `\section{\texorpdfstring{\pttext{spanish={Resumen},english={Summary}}}{Summary}}` when the bookmark should read “Summary”.
+
+Run `python3 tests/check-localized-text.py` for the multilingual contract checks with PDFLaTeX, XeLaTeX and LuaLaTeX; optional engine arguments restrict the run.
 
 ### Module Loading
 
